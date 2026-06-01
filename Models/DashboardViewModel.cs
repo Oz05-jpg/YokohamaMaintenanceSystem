@@ -2,8 +2,9 @@
 {
     public class DashboardViewModel
     {
-        public int MachinCount { get; internal set; }
-        public int CompletedRequests { get; internal set; }
-        public int OpenRequests { get; internal set; }
+        public int MachineCount { get; set; }
+        public int PendingRequests { get; set; }
+        public int InProgressRequests { get; set; }
+        public int CompletedRequests { get; set; }
     }
 }

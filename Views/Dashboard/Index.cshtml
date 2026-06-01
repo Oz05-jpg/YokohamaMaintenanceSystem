@@ -1,6 +1,42 @@
-﻿namespace YokohamaMaintenanceSystem.Views.Dashboard
-{
-    public class Index
-    {
-    }
+﻿@model YokohamaMaintenanceSystem.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
+
+<h2>Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Machines</h5>
+                <p class="card-text display-6">@Model.MachineCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Pending</h5>
+                <p class="card-text display-6">@Model.PendingRequests</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">In Progress</h5>
+                <p class="card-text display-6">@Model.InProgressRequests</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Completed</h5>
+                <p class="card-text display-6">@Model.CompletedRequests</p>
+            </div>
+        </div>
+    </div>
+</div>

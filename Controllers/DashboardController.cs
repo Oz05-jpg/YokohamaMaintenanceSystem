@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Models;
 
@@ -7,25 +8,24 @@ namespace YokohamaMaintenanceSystem.Controllers
     public class DashboardController : Controller
     {
         private readonly AppDbContext _context;
+
         public DashboardController(AppDbContext context)
         {
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var machinCount = _context.Machines.Count();
-            var openRequests = _context.MaintenanceRequests
-                               .Count(r => r.Status == "Open");
-            var completedRequests = _context.MaintenanceRequests.Count(r => r.Status == "Completed");
-
             var vm = new DashboardViewModel
             {
-                MachinCount = machinCount,
-                OpenRequests = openRequests,
-                CompletedRequests = completedRequests
+                MachineCount = await _context.Machines.CountAsync(),
+                PendingRequests = await _context.MaintenanceRequests
+                    .CountAsync(r => r.Status == "Pending"),
+                InProgressRequests = await _context.MaintenanceRequests
+                    .CountAsync(r => r.Status == "In Progress"),
+                CompletedRequests = await _context.MaintenanceRequests
+                    .CountAsync(r => r.Status == "Completed")
             };
-
             return View(vm);
         }
     }
