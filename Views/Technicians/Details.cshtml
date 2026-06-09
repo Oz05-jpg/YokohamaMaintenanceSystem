@@ -1,0 +1,30 @@
+@model YokohamaMaintenanceSystem.Models.Technician
+@{
+    ViewData["Title"] = "Technician Details";
+}
+
+<div class="yms-header">
+    <h2>👷 Technician Details</h2>
+    <a asp-action="Index" class="btn btn-outline-light btn-sm">← Back</a>
+</div>
+
+<div class="form-card">
+    <dl class="row">
+        <dt class="col-sm-4 text-muted">ชื่อ-นามสกุล</dt>
+        <dd class="col-sm-8 fw-semibold">@Model.FullName</dd>
+
+        <dt class="col-sm-4 text-muted">ความเชี่ยวชาญ</dt>
+        <dd class="col-sm-8">@Model.Specialization</dd>
+
+        <dt class="col-sm-4 text-muted">เบอร์โทร</dt>
+        <dd class="col-sm-8">@Model.PhoneNumber</dd>
+    </dl>
+
+    <hr />
+
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-yms">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Delete</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+    </div>
+</div>

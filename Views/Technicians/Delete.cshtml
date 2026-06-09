@@ -1,0 +1,28 @@
+@model YokohamaMaintenanceSystem.Models.Technician
+@{
+    ViewData["Title"] = "Delete Technician";
+}
+
+<div class="yms-header">
+    <h2>🗑️ Delete Technician</h2>
+</div>
+
+<div class="delete-warning mb-4">
+    <strong>ยืนยันการลบ?</strong>
+    <p class="mb-0 mt-1">ช่างเทคนิค: <strong>@Model.FullName</strong> จะถูกลบออกจากระบบถาวร</p>
+</div>
+
+<dl class="row mb-4">
+    <dt class="col-sm-3">ความเชี่ยวชาญ</dt>
+    <dd class="col-sm-9">@Model.Specialization</dd>
+    <dt class="col-sm-3">เบอร์โทร</dt>
+    <dd class="col-sm-9">@Model.PhoneNumber</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger px-4">ลบ</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">ยกเลิก</a>
+    </div>
+</form>

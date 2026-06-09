@@ -1,0 +1,36 @@
+@model YokohamaMaintenanceSystem.Models.Technician
+@{
+    ViewData["Title"] = "Add Technician";
+}
+
+<div class="yms-header">
+    <h2>+ Add Technician</h2>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="FullName" class="form-label fw-semibold"></label>
+            <input asp-for="FullName" class="form-control" placeholder="ชื่อ-นามสกุล" />
+            <span asp-validation-for="FullName" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Specialization" class="form-label fw-semibold"></label>
+            <input asp-for="Specialization" class="form-control" placeholder="เช่น Hydraulics, Electrical" />
+            <span asp-validation-for="Specialization" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="081-234-5678" />
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-yms px-4">Save</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

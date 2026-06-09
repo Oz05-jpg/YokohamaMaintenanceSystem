@@ -29,3 +29,62 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/* === YMS Industrial Theme === */
+.yms-header {
+    background: #1B2A4A;
+    color: white;
+    padding: 1.25rem 1.75rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .yms-header h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        letter-spacing: 0.5px;
+    }
+
+.btn-yms {
+    background: #F59E0B;
+    border: none;
+    color: #1B2A4A;
+    font-weight: 700;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+}
+
+    .btn-yms:hover {
+        background: #D97706;
+        color: #1B2A4A;
+    }
+
+.yms-table thead th {
+    background: #1B2A4A;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 0.85rem 1rem;
+}
+
+.yms-table tbody tr:hover {
+    background: #FFF8EC;
+}
+
+.form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    max-width: 560px;
+}
+
+.delete-warning {
+    border-left: 4px solid #DC2626;
+    background: #FEF2F2;
+    padding: 1rem 1.5rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1.5rem;
+}

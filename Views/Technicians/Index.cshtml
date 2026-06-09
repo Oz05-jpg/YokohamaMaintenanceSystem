@@ -1,0 +1,50 @@
+﻿@model IEnumerable<YokohamaMaintenanceSystem.Models.Technician>
+@{
+    ViewData["Title"] = "Technicians";
+}
+
+<div class="yms-header">
+    <h2>👷 Technician Management</h2>
+    <a asp-action="Create" class="btn btn-yms">+ Add Technician</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <p style="font-size:1.1rem">ยังไม่มีข้อมูลช่างเทคนิค</p>
+        <a asp-action="Create" class="btn btn-yms mt-2">เพิ่มช่างคนแรก</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table yms-table">
+            <thead>
+                <tr>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>ความเชี่ยวชาญ</th>
+                    <th>เบอร์โทร</th>
+                    <th style="width:140px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FullName</td>
+                        <td>@item.Specialization</td>
+                        <td>@item.PhoneNumber</td>
+                        <td class="d-flex gap-1">
+                            <a asp-action="Details" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-primary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
