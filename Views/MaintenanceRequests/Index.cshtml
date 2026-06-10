@@ -36,7 +36,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.Machine)
             </th>
-            <th></th>
+            <th>Techncian</th>
+            <tbody>
+
+            </tbody>
         </tr>
     </thead>
     <tbody>
@@ -64,8 +67,11 @@
                 @Html.DisplayFor(model => item.MachineId)
             </td>
             <td>
-                @Html.DisplayFor(model => item.Machine)
+                    @item.Machine?.Name
             </td>
+                <td>
+                    @(item.Technician?.FullName ?? "ยังไม่ assign")
+                </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
