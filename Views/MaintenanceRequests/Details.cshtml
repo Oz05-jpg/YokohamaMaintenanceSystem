@@ -69,5 +69,14 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <form asp-action="UpdateStatus" asp-route-id="@Model?.Id" method="post" style="display:inline">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <select name="Status">
+            <option value="Pending">Pending</option>
+            <option value="InProgress">In Progress</option>
+            <option value="Completed">Completed</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
     <a asp-action="Index">Back to List</a>
 </div>

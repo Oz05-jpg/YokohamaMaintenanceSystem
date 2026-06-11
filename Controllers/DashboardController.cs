@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
+using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Models;
 
 namespace YokohamaMaintenanceSystem.Controllers
@@ -20,11 +21,11 @@ namespace YokohamaMaintenanceSystem.Controllers
             {
                 MachineCount = await _context.Machines.CountAsync(),
                 PendingRequests = await _context.MaintenanceRequests
-                    .CountAsync(r => r.Status == "Pending"),
+                    .CountAsync(r => r.Status == RequestStatus.Pending),
                 InProgressRequests = await _context.MaintenanceRequests
-                    .CountAsync(r => r.Status == "In Progress"),
+                    .CountAsync(r => r.Status == RequestStatus.InProgress),
                 CompletedRequests = await _context.MaintenanceRequests
-                    .CountAsync(r => r.Status == "Completed")
+                    .CountAsync(r => r.Status == RequestStatus.Completed)
             };
             return View(vm);
         }

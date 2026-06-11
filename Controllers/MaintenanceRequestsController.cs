@@ -3,119 +3,212 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
+using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Models;
 
-[Authorize]
-public class MaintenanceRequestsController : Controller
+namespace YokohamaMaintenanceSystem.Controllers
 {
-    private readonly AppDbContext _context;
-
-    public MaintenanceRequestsController(AppDbContext context)
+    [Authorize]
+    public class MaintenanceRequestsController : Controller
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
 
-    // GET: requests
-    public async Task<IActionResult> Index()
-    {
-        var requests = await _context.MaintenanceRequests
-            .Include(r => r.Machine)
-            .Include(r => r.Technician)
-            .ToListAsync();
-        return View(requests);
-    }
-
-    // GET: requests/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public MaintenanceRequestsController(AppDbContext context)
         {
-            return NotFound();
+            _context = context;
         }
 
-        var requests = await _context.MaintenanceRequests
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (requests == null)
+        // GET: requests
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            var requests = await _context.MaintenanceRequests
+                .Include(r => r.Machine)
+                .Include(r => r.Technician)
+                .ToListAsync();
+            return View(requests);
         }
 
-        return View(requests);
-    }
-
-    // GET: requests/Create
-    public async Task<IActionResult> CreateAsync()
-    {
-        // ดึงข้อมูลเครื่องจักรและช่างเทคนิคเพื่อแสดงใน dropdown
-        ViewBag.MachineId = new SelectList(
-            await _context.Machines.ToListAsync(), "Id", "Name");
-
-        ViewBag.TechnicianId = new SelectList(
-            await _context.Technicians.ToListAsync(), "Id", "FullName");
-
-        return View();
-    }
-
-    // POST: requests/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request)
-    {
-        if (ModelState.IsValid)
+        // GET: requests/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            _context.Add(request);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var requests = await _context.MaintenanceRequests
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (requests == null)
+            {
+                return NotFound();
+            }
+
+            return View(requests);
+        }
+
+        // GET: requests/Create
+        public async Task<IActionResult> Create()
+        {
+            // ดึงข้อมูลเครื่องจักรและช่างเทคนิคเพื่อแสดงใน dropdown
+            ViewBag.MachineId = new SelectList(
+                await _context.Machines.ToListAsync(),// ดึงข้อมูลเครื่องจักรทั้งหมดจากฐานข้อมูลและแปลงเป็นรายการสำหรับ dropdown list
+                "Id",// กำหนดให้ค่าที่จะส่งกลับเมื่อมีการเลือกใน dropdown list คือค่า Id ของเครื่องจักร
+                "Name");// กำหนดให้ค่าที่จะแสดงใน dropdown list คือค่า Name ของเครื่องจักร
+                        //SelectList เป็นคลาสที่ใช้ในการสร้างรายการสำหรับ dropdown list ใน ASP.NET MVC โดยจะรับข้อมูลจากฐานข้อมูลหรือแหล่งข้อมูลอื่น ๆ และกำหนดค่าที่จะแสดงใน dropdown list และค่าที่จะส่งกลับเมื่อมีการเลือก
+            ViewBag.TechnicianId = new SelectList(
+                await _context.Technicians.ToListAsync(), "Id", "FullName");
+            return View();
+        }
+
+        // POST: requests/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(request);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.MachineId = new SelectList(
+                await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
+            ViewBag.TechnicianId = new SelectList(
+                await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
+
+            return View(request);
+        }
+
+        // GET: requests/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var request = await _context.MaintenanceRequests.FindAsync(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+            ViewBag.MachineId = new SelectList(
+                await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
+            ViewBag.TechnicianId = new SelectList(
+                await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
+            ViewBag.Status = new SelectList(
+                Enum.GetValues(typeof(RequestStatus)), request.Status);
+
+            return View(request);
+        }
+
+        // POST: requests/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int? id, [Bind("Id,Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request)
+        {
+            if (id != request.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(request);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!MaintenanceRequestExists(request.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.MachineId = new SelectList(
+                await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
+            ViewBag.TechnicianId = new SelectList(
+                await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
+            ViewBag.Status = new SelectList(
+                Enum.GetValues(typeof(RequestStatus)), request.Status);
+            return View(request);
+        }
+
+        // GET: requests/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var requests = await _context.MaintenanceRequests
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (requests == null)
+            {
+                return NotFound();
+            }
+
+            return View(requests);
+        }
+
+        // POST: requests/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int? id)
+        {
+            var requests = await _context.MaintenanceRequests.FindAsync(id);
+            if (requests != null)
+            {
+                _context.MaintenanceRequests.Remove(requests);
+            }
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        ViewBag.MachineId = new SelectList(
-            await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
-        ViewBag.TechnicianId = new SelectList(
-            await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
-
-        return View(request);
-    }
-
-    // GET: requests/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
+        private bool MaintenanceRequestExists(int? id)
         {
-            return NotFound();
+            return _context.MaintenanceRequests.Any(e => e.Id == id);
         }
 
-        var request = await _context.MaintenanceRequests.FindAsync(id);
-        if (request == null)
+        // POST: requests/UpdateStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int? id, string newStatus)
         {
-            return NotFound();
-        }
-        ViewBag.MachineId = new SelectList(
-            await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
-        ViewBag.TechnicianId = new SelectList(
-            await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
-        return View(request);
-    }
-
-    // POST: requests/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("Id,Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request)
-    {
-        if (id != request.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
+            if (id == null || string.IsNullOrEmpty(newStatus))
+            {
+                return BadRequest();
+            }
+            var request = await _context.MaintenanceRequests.FindAsync(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+            // อัปเดตสถานะของคำขอ
+            if (!Enum.TryParse(newStatus, out RequestStatus status))// แปลงค่า Status ที่เป็น string ให้เป็น enum RequestStatus ถ้าไม่สามารถแปลงได้จะคืนค่า false และ status จะมีค่า default ของ RequestStatus
+            {
+                return BadRequest();
+            }
+            request.Status = status; // อัปเดตสถานะของคำขอเป็นค่าที่แปลงได้จาก Status
             try
             {
                 _context.Update(request);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Details), new { id = request.Id });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -128,51 +221,7 @@ public class MaintenanceRequestsController : Controller
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
-        }
-        ViewBag.MachineId = new SelectList(
-            await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
-        ViewBag.TechnicianId = new SelectList(
-            await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
-
-        return View(request);
-    }
-
-    // GET: requests/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
         }
 
-        var requests = await _context.MaintenanceRequests
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (requests == null)
-        {
-            return NotFound();
-        }
-
-        return View(requests);
-    }
-
-    // POST: requests/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? id)
-    {
-        var requests = await _context.MaintenanceRequests.FindAsync(id);
-        if (requests != null)
-        {
-            _context.MaintenanceRequests.Remove(requests);
-        }
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    private bool MaintenanceRequestExists(int? id)
-    {
-        return _context.MaintenanceRequests.Any(e => e.Id == id);
     }
 }

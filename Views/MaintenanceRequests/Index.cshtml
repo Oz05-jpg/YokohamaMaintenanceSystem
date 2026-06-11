@@ -1,3 +1,4 @@
+@using YokohamaMaintenanceSystem.Enums
 @model IEnumerable<YokohamaMaintenanceSystem.Models.MaintenanceRequest>
 
 @{
@@ -55,7 +56,19 @@
                 @Html.DisplayFor(model => item.Priority)
             </td>
             <td>
-                @Html.DisplayFor(model => item.Status)
+                    @if (item.Status == RequestStatus.Pending)
+                    {
+                    <span class="badge bg-warning text-dark">Pending</span>
+                    }
+                    else if (item.Status == RequestStatus.InProgress)
+                    {
+                    <span class="badge bg-primary">In Progress</span>
+                    }
+                    else if (item.Status == RequestStatus.Completed)
+                    {
+                    <span class="badge bg-success">Completed</span>
+                    }
+                    
             </td>
             <td>
                 @Html.DisplayFor(model => item.CreatedAt)
