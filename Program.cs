@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
+using YokohamaMaintenanceSystem.Repositories;
 
 namespace YokohamaMaintenanceSystem
 {
@@ -11,26 +13,28 @@ namespace YokohamaMaintenanceSystem
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Database
             builder.Services.AddDbContext<AppDbContext>(option =>
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
+            // Repositories
+            builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
+            // Identity
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
                 options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
-
+            //Cookie settings
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
-
+            // Static assets
             var app = builder.Build();
-
+            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -50,6 +54,7 @@ namespace YokohamaMaintenanceSystem
 
             app.MapRazorPages();
 
+            // Seed data
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

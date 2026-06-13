@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 
 namespace YokohamaMaintenanceSystem.Controllers
@@ -11,20 +12,22 @@ namespace YokohamaMaintenanceSystem.Controllers
     [Authorize]
     public class MaintenanceRequestsController : Controller
     {
+
+        private readonly IMaintenanceRequestRepository _repo;
         private readonly AppDbContext _context;
 
-        public MaintenanceRequestsController(AppDbContext context)
+        public MaintenanceRequestsController(
+            IMaintenanceRequestRepository repo,
+            AppDbContext context)
         {
+            _repo = repo;
             _context = context;
         }
 
         // GET: requests
         public async Task<IActionResult> Index()
         {
-            var requests = await _context.MaintenanceRequests
-                .Include(r => r.Machine)
-                .Include(r => r.Technician)
-                .ToListAsync();
+            var requests = await _repo.GetAllAsync();
             return View(requests);
         }
 
@@ -36,8 +39,8 @@ namespace YokohamaMaintenanceSystem.Controllers
                 return NotFound();
             }
 
-            var requests = await _context.MaintenanceRequests
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var requests = await _repo.GetByIdAsync(id.Value);
+
             if (requests == null)
             {
                 return NotFound();
@@ -51,13 +54,14 @@ namespace YokohamaMaintenanceSystem.Controllers
         {
             // ดึงข้อมูลเครื่องจักรและช่างเทคนิคเพื่อแสดงใน dropdown
             ViewBag.MachineId = new SelectList(
-                await _context.Machines.ToListAsync(),// ดึงข้อมูลเครื่องจักรทั้งหมดจากฐานข้อมูลและแปลงเป็นรายการสำหรับ dropdown list
-                "Id",// กำหนดให้ค่าที่จะส่งกลับเมื่อมีการเลือกใน dropdown list คือค่า Id ของเครื่องจักร
-                "Name");// กำหนดให้ค่าที่จะแสดงใน dropdown list คือค่า Name ของเครื่องจักร
-                        //SelectList เป็นคลาสที่ใช้ในการสร้างรายการสำหรับ dropdown list ใน ASP.NET MVC โดยจะรับข้อมูลจากฐานข้อมูลหรือแหล่งข้อมูลอื่น ๆ และกำหนดค่าที่จะแสดงใน dropdown list และค่าที่จะส่งกลับเมื่อมีการเลือก
+               await _context.Machines.ToListAsync(), "Id", "Name");
             ViewBag.TechnicianId = new SelectList(
-                await _context.Technicians.ToListAsync(), "Id", "FullName");
+                await _context.Technicians.ToListAsync(), "Id", "Name");
+            ViewBag.Status = new SelectList(
+                Enum.GetValues(typeof(RequestStatus)));
             return View();
+
+
         }
 
         // POST: requests/Create
@@ -69,8 +73,7 @@ namespace YokohamaMaintenanceSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(request);
-                await _context.SaveChangesAsync();
+                await _repo.AddAsync(request);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -78,7 +81,8 @@ namespace YokohamaMaintenanceSystem.Controllers
                 await _context.Machines.ToListAsync(), "Id", "Name", request.MachineId);
             ViewBag.TechnicianId = new SelectList(
                 await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
-
+            ViewBag.Status = new SelectList(
+                Enum.GetValues(typeof(RequestStatus)), request.Status);
             return View(request);
         }
 
@@ -90,7 +94,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 return NotFound();
             }
 
-            var request = await _context.MaintenanceRequests.FindAsync(id);
+            var request = await _repo.GetByIdAsync(id.Value);
             if (request == null)
             {
                 return NotFound();
@@ -121,8 +125,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             {
                 try
                 {
-                    _context.Update(request);
-                    await _context.SaveChangesAsync();
+                    await _repo.UpdateAsync(request);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -154,8 +157,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 return NotFound();
             }
 
-            var requests = await _context.MaintenanceRequests
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var requests = await _repo.GetByIdAsync(id.Value);
             if (requests == null)
             {
                 return NotFound();
@@ -169,13 +171,9 @@ namespace YokohamaMaintenanceSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            var requests = await _context.MaintenanceRequests.FindAsync(id);
-            if (requests != null)
-            {
-                _context.MaintenanceRequests.Remove(requests);
-            }
-
-            await _context.SaveChangesAsync();
+            var requests = await _repo.GetByIdAsync(id.Value);
+            if (requests == null) return NotFound();
+            await _repo.DeleteAsync(id.Value);
             return RedirectToAction(nameof(Index));
         }
 
@@ -193,7 +191,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             {
                 return BadRequest();
             }
-            var request = await _context.MaintenanceRequests.FindAsync(id);
+            var request = await _repo.GetByIdAsync(id.Value);
             if (request == null)
             {
                 return NotFound();
@@ -206,8 +204,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             request.Status = status; // อัปเดตสถานะของคำขอเป็นค่าที่แปลงได้จาก Status
             try
             {
-                _context.Update(request);
-                await _context.SaveChangesAsync();
+                await _repo.UpdateAsync(request);
                 return RedirectToAction(nameof(Details), new { id = request.Id });
             }
             catch (DbUpdateConcurrencyException)
