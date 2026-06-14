@@ -42,17 +42,73 @@ public class MaintenanceRequestControllerTests
         Assert.Equal(2, model.Count());
     }
 
-    [Fact]
-    public async Task Details_InvalidId_ReturnsNotFound()
+    //[Fact]
+    //public async Task Details_InvalidId_ReturnsNotFound()
+    //{
+    //    // Arrange
+    //    _mockRepo.Setup(r => r.GetByIdAsync(99))
+    //             .ReturnsAsync((MaintenanceRequest)null);
+
+    //    // Act
+    //    var result = await _controller.Details(99);
+
+    //    // Assert
+    //    Assert.IsType<NotFoundResult>(result);
+    //}
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(999)]
+    public async Task Details_InvalidId_ReturnsNotFound(int invalidId)
     {
         // Arrange
-        _mockRepo.Setup(r => r.GetByIdAsync(99))
+        _mockRepo.Setup(r => r.GetByIdAsync(invalidId))
                  .ReturnsAsync((MaintenanceRequest)null);
 
         // Act
-        var result = await _controller.Details(99);
+        var result = await _controller.Details(invalidId);
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
     }
+
+    [Fact]
+    //Create
+    public async Task Create_ValidRequest_RedirectsToIndex()
+    {
+        //Arrange
+        var request = new MaintenanceRequest
+        {
+            Title = "Test",
+            Description = "Test",
+            Priority = "High"
+        };
+        // Act
+        var result = await _controller.Create(request);
+
+        // Assert
+        var redirect = Assert.IsType<RedirectToActionResult>(result);//
+        Assert.Equal("Index", redirect.ActionName);//
+    }
+
+    [Fact]
+    public async Task Index_ReturnsEmptyList_WhenNoRequests()
+    {
+        // Arrange
+        _mockRepo.Setup(r => r.GetAllAsync())
+                 .ReturnsAsync(new List<MaintenanceRequest>());  // ← empty list
+
+        // Act
+        var result = await _controller.Index() as ViewResult;
+
+        // Assert
+        Assert.NotNull(result);
+        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
+        Assert.Equal(0, model.Count());
+    }
+
+
+
+
 }
