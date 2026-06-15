@@ -25,10 +25,37 @@ namespace YokohamaMaintenanceSystem.Controllers
         }
 
         // GET: requests
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index
+            (string? keyword, string? status)
         {
-            var requests = await _repo.GetAllAsync();
-            return View(requests);
+            RequestStatus? parseStatus = null;
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RequestStatus>(status, out var s))
+                parseStatus = s;
+
+            var requests = await _repo.GetFilteredAsync(keyword, parseStatus);
+            ViewBag.Keyword = keyword;
+            ViewBag.Statuses = new SelectList(Enum.GetValues(typeof(RequestStatus)));
+            ViewBag.SelectedRequests = parseStatus;
+            return View(requests);//คือ
+        }
+
+        // GET: LINQ Filter
+        public async Task<List<MaintenanceRequest>> GetFilteredAsync(
+            string? keyword, RequestStatus? status)
+        {
+            var query = _context.MaintenanceRequests.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+                query = query.Where(r => r.Title.Contains(keyword)
+                              || r.Description.Contains(keyword));
+
+            if (status != null)
+                query = query.Where(r => r.Status == status);
+
+            return await query
+                .Include(r => r.Machine)
+                .Include(r => r.Technician)
+                .ToListAsync();
         }
 
         // GET: requests/Details/5
@@ -56,9 +83,9 @@ namespace YokohamaMaintenanceSystem.Controllers
             ViewBag.MachineId = new SelectList(
                await _context.Machines.ToListAsync(), "Id", "Name");
             ViewBag.TechnicianId = new SelectList(
-                await _context.Technicians.ToListAsync(), "Id", "Name");
+                await _context.Technicians.ToListAsync(), "Id", "FullName");
             ViewBag.Status = new SelectList(
-                Enum.GetValues(typeof(RequestStatus)));
+                Enum.GetValues<RequestStatus>());
             return View();
 
 
@@ -145,7 +172,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             ViewBag.TechnicianId = new SelectList(
                 await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
             ViewBag.Status = new SelectList(
-                Enum.GetValues(typeof(RequestStatus)), request.Status);
+                Enum.GetValues<RequestStatus>(), request.Status);
             return View(request);
         }
 
@@ -219,6 +246,5 @@ namespace YokohamaMaintenanceSystem.Controllers
                 }
             }
         }
-
     }
 }

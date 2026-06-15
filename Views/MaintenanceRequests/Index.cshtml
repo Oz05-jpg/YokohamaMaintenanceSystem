@@ -6,7 +6,26 @@
 }
 
 <h1>Index</h1>
-
+<form method="get" asp-action="Index" class="mb-3 d-flex gap-2" autocomplete="off">
+    <input type="text" name="keyword" value="@ViewBag.Keyword"
+           class="form-control" placeholder="ค้นหา Title หรือ Description..." />
+    <select name="status" class="form-select" style="width:200px" onchange="this.form.submit()">
+            <option value="">All Status</option>
+        @foreach (var s in Enum.GetValues(typeof(RequestStatus)))
+        {
+            if (ViewBag.SelectedStatus?.ToString() == s.ToString())
+            {
+                <option value="@s" selected>@s</option>
+            }
+            else
+            {
+                <option value="@s">@s</option>
+            }
+        }
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+</form>
 <p>
     <a asp-action="Create">Create New</a>
 </p>
@@ -92,5 +111,14 @@
             </td>
         </tr>
 }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="9" class="text-center text-muted">ไม่พบข้อมูล</td></tr>
+        }
     </tbody>
 </table>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.querySelector('select[name="status"]').value = params.get('status') || '';
+</script>
