@@ -26,36 +26,24 @@ namespace YokohamaMaintenanceSystem.Controllers
 
         // GET: requests
         public async Task<IActionResult> Index
-            (string? keyword, string? status)
+            (string? keyword,
+            RequestStatus? status,
+            int pageNumber = 1)
         {
-            RequestStatus? parseStatus = null;
-            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RequestStatus>(status, out var s))
-                parseStatus = s;
+            var requests = await _repo.GetFilteredAsync(keyword, status, pageNumber);
 
-            var requests = await _repo.GetFilteredAsync(keyword, parseStatus);
-            ViewBag.Keyword = keyword;
-            ViewBag.Statuses = new SelectList(Enum.GetValues(typeof(RequestStatus)));
-            ViewBag.SelectedRequests = parseStatus;
-            return View(requests);//คือ
-        }
 
-        // GET: LINQ Filter
-        public async Task<List<MaintenanceRequest>> GetFilteredAsync(
-            string? keyword, RequestStatus? status)
-        {
-            var query = _context.MaintenanceRequests.AsQueryable();
+            var viewModels = new PagedRequestViewModel
+            {
+                Requests = requests,
+                CurrentPage = pageNumber,
+                HasNextPage = requests.Count == 10, // ถ้าได้ครบ 10 แถว = น่าจะมีหน้าถัดไป
+                Keyword = keyword,
+                SelectStatus = status
+            };
 
-            if (!string.IsNullOrEmpty(keyword))
-                query = query.Where(r => r.Title.Contains(keyword)
-                              || r.Description.Contains(keyword));
-
-            if (status != null)
-                query = query.Where(r => r.Status == status);
-
-            return await query
-                .Include(r => r.Machine)
-                .Include(r => r.Technician)
-                .ToListAsync();
+            ViewBag.Statuses = new SelectList(Enum.GetValues(typeof(RequestStatus)));  //เก็บไว้ — ViewModel ไม่มี SelectList สำหรับ dropdown
+            return View(viewModels);
         }
 
         // GET: requests/Details/5

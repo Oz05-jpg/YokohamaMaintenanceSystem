@@ -1,19 +1,18 @@
 @using YokohamaMaintenanceSystem.Enums
-@model IEnumerable<YokohamaMaintenanceSystem.Models.MaintenanceRequest>
-
+@model YokohamaMaintenanceSystem.Models.PagedRequestViewModel
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Index</h1>
 <form method="get" asp-action="Index" class="mb-3 d-flex gap-2" autocomplete="off">
-    <input type="text" name="keyword" value="@ViewBag.Keyword"
+    <input type="text" name="keyword" value="@Model.Keyword"
            class="form-control" placeholder="ค้นหา Title หรือ Description..." />
     <select name="status" class="form-select" style="width:200px" onchange="this.form.submit()">
             <option value="">All Status</option>
         @foreach (var s in Enum.GetValues(typeof(RequestStatus)))
         {
-            if (ViewBag.SelectedStatus?.ToString() == s.ToString())
+            if (Model.SelectStatus?.ToString() == s.ToString())
             {
                 <option value="@s" selected>@s</option>
             }
@@ -33,28 +32,28 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Priority)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.Priority)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.Status)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.CreatedAt)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CompletedAt)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.CompletedAt)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MachineId)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.MachineId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Machine)
+                @Html.DisplayNameFor(model => model.Requests.FirstOrDefault()!.Machine)
             </th>
             <th>Techncian</th>
             <tbody>
@@ -63,7 +62,7 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Requests) {
         <tr>
             <td>
                 @Html.DisplayFor(model => item.Title)
@@ -111,13 +110,31 @@
             </td>
         </tr>
 }
-        @if (!Model.Any())
+        @if (!Model.Requests.Any())
         {
             <tr><td colspan="9" class="text-center text-muted">ไม่พบข้อมูล</td></tr>
         }
     </tbody>
 </table>
-
+<div class="d-flex gap-2 mt-3" >
+    @if (Model.CurrentPage > 1)
+    {
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.CurrentPage - 1)"
+           asp-route-keyword="@Model.Keyword"
+           asp-route-status="@Model.SelectStatus"
+           class="btn btn-outline-secondary">← Previous</a>
+    }
+    <span class="align-self-center">หน้า @Model.CurrentPage</span>
+    @if (Model.HasNextPage)
+    {
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.CurrentPage + 1)"
+           asp-route-keyword="@Model.Keyword"
+           asp-route-status="@Model.SelectStatus"
+           class="btn btn-outline-primary">Next →</a>
+    }
+</div>
 <script>
     const params = new URLSearchParams(window.location.search);
     document.querySelector('select[name="status"]').value = params.get('status') || '';

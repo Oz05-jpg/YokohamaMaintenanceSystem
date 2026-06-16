@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Collections;
+using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Interfaces;
@@ -10,8 +9,6 @@ namespace YokohamaMaintenanceSystem.Repositories
     public class MaintenanceRequestRepository : IMaintenanceRequestRepository
     {
         private readonly AppDbContext _context;
-
-        public object Machines => throw new NotImplementedException();
 
         public MaintenanceRequestRepository(AppDbContext context)
         {
@@ -29,7 +26,7 @@ namespace YokohamaMaintenanceSystem.Repositories
         }
 
         public async Task<List<MaintenanceRequest>> GetFilteredAsync(
-        string? keyword, RequestStatus? status)
+            string? keyword, RequestStatus? status, int pageNumber, int pageSize = 10)
         {
             var query = _context.MaintenanceRequests.AsQueryable();
 
@@ -40,7 +37,12 @@ namespace YokohamaMaintenanceSystem.Repositories
             if (status != null)
                 query = query.Where(r => r.Status == status);
 
+            int skip = (pageNumber - 1) * pageSize;
+
             return await query
+                .OrderBy(r => r.Id)
+                .Skip(skip)
+                .Take(pageSize)
                 .Include(r => r.Machine)
                 .Include(r => r.Technician)
                 .ToListAsync();
@@ -68,29 +70,5 @@ namespace YokohamaMaintenanceSystem.Repositories
             }
         }
 
-        public object GetByIdAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable> AddAsync(object request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateAsync(object request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAsync(int? id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void GetFilteredAsync()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
