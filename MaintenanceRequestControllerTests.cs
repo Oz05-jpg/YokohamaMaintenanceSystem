@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using YokohamaMaintenanceSystem.Controllers;
 using YokohamaMaintenanceSystem.Data;
+using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 namespace YokohamaMaintenanceSystem.Tests;
@@ -32,10 +33,14 @@ public class MaintenanceRequestControllerTests
             new MaintenanceRequest { Id = 1, Title = "Fix Machine A", Description = "Test", Priority = "High" },
             new MaintenanceRequest { Id = 2, Title = "Check Conveyor", Description = "Test", Priority = "Low" }
         };
-        _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(fakeList);
+
+        _mockRepo.Setup(r => r.GetFilteredAsync(
+            It.IsAny<string?>(),
+            It.IsAny<RequestStatus?>()))
+        .ReturnsAsync(fakeList);
 
         // Act คือ ดึง method จริงมา มาใช้ Test
-        var result = await _controller.Index() as ViewResult;
+        var result = await _controller.Index(null, null) as ViewResult;
 
         // Assert คือ ตรวจสอบผลลัพธ์
         var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
@@ -96,11 +101,12 @@ public class MaintenanceRequestControllerTests
     public async Task Index_ReturnsEmptyList_WhenNoRequests()
     {
         // Arrange
-        _mockRepo.Setup(r => r.GetAllAsync())
-                 .ReturnsAsync(new List<MaintenanceRequest>());  // ← empty list
+        _mockRepo.Setup(r => r.GetFilteredAsync(
+        It.IsAny<string?>(), It.IsAny<RequestStatus?>()))
+        .ReturnsAsync(new List<MaintenanceRequest>());
 
         // Act
-        var result = await _controller.Index() as ViewResult;
+        var result = await _controller.Index(null, null) as ViewResult;
 
         // Assert
         Assert.NotNull(result);
@@ -108,7 +114,53 @@ public class MaintenanceRequestControllerTests
         Assert.Equal(0, model.Count());
     }
 
+    [Fact]
+    public async Task Index_FilterByStatus_ReturnsMatchingRecords()
+    {
+        //arrange
+        var pendingList = new List<MaintenanceRequest>
+        {
+            new MaintenanceRequest { Id = 1, Title = "Fix pump",
+                Description = "Test", Priority = "High",
+                Status = RequestStatus.Pending }
+        };
+
+        _mockRepo.Setup(r => r.GetFilteredAsync(
+        It.IsAny<string?>(),
+        It.IsAny<RequestStatus?>()))
+        .ReturnsAsync(pendingList);
+
+        // Act
+        var result = await _controller.Index(null, "Pending") as ViewResult;
 
 
+        // Assert
+        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
+        Assert.Single(model);
+    }
 
+    [Fact]
+    public async Task Index_FilterByKeyword_ReturnsMatchingRecords()
+    {
+        // Arrange
+        var filtered = new List<MaintenanceRequest>
+        {
+              new MaintenanceRequest
+            {
+                Id = 2,
+                Title = "Pump broken",
+                Description = "Test",
+                Priority = "High",
+                Status = YokohamaMaintenanceSystem.Enums.RequestStatus.Pending }
+        };
+        _mockRepo.Setup(r => r.GetFilteredAsync("Pump", null))
+                 .ReturnsAsync(filtered);
+        // Act
+        var result = await _controller.Index("Pump", null) as ViewResult;
+
+        // Assert
+        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
+        Assert.Single(model);
+        Assert.Contains("Pump", model.First().Title);
+    }
 }
