@@ -14,12 +14,21 @@ namespace YokohamaMaintenanceSystem
         {
             var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews()
+                .AddJsonOptions(options =>
+                 {
+                     options.JsonSerializerOptions.ReferenceHandler =
+                         System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                 });
 
+            // ── Services section
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
             // Database
             builder.Services.AddDbContext<AppDbContext>(option =>
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Repositories
+
             builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
             // Identity
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -35,14 +44,22 @@ namespace YokohamaMaintenanceSystem
             // Static assets
             var app = builder.Build();
             // Configure the HTTP request pipeline.
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Home/Error"); //ดัก 500
+                app.UseStatusCodePagesWithReExecute("/home/Error/{0}");// status code จริง เช่น /Home/Error/404 ดัก 404/403
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
-            app.UseRouting();
+            app.UseRouting();//UseExceptionHandler ต้องวาง ก่อน UseRouting() เสมอ
             app.UseAuthentication();
             app.UseAuthorization();
 
