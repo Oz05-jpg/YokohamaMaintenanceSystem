@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 
 namespace YokohamaMaintenanceSystem.Controllers
 {
-    [ApiController]
+    [Authorize]//เพิ่ม attribute อะไรเพื่อล็อก endpoint ให้เฉพาะ user ที่มี token เท่านั้น?
     [Route("api/maintenance")]
+    [ApiController]
     public class MaintenanceApiController : ControllerBase
     {
         private readonly IMaintenanceRequestRepository _repo;

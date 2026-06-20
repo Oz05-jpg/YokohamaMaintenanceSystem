@@ -1,10 +1,16 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Filters;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 using YokohamaMaintenanceSystem.Repositories;
+
 
 namespace YokohamaMaintenanceSystem
 {
@@ -18,17 +24,53 @@ namespace YokohamaMaintenanceSystem
                 .AddJsonOptions(options =>
                  {
                      options.JsonSerializerOptions.ReferenceHandler =
-                         System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                         System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;//enum IgnoreCycles เพื่อออกจากลูป เจอ object ที่เคย serialize แล้ว → ข้ามไป ไม่วนซ้ำ 
                  });
 
             // ── Services section
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            // Swagger
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "ใส่แค่ JWT token (ไม่ต้องใส่ Bearer นำหน้า)"
+                });
+                c.OperationFilter<BearerAuthOperationFilter>();
+            });
+
+            // JwtSettings
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings["SecretKey"];
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme =
+                  JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(secretKey!))
+                };
+            });
+
             // Database
             builder.Services.AddDbContext<AppDbContext>(option =>
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Repositories
-
             builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
             // Identity
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -58,12 +100,13 @@ namespace YokohamaMaintenanceSystem
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseRouting();//UseExceptionHandler ต้องวาง ก่อน UseRouting() เสมอ
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
+            app.MapControllers();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
@@ -130,6 +173,9 @@ namespace YokohamaMaintenanceSystem
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 await DbInitializer.SeedAsync(context);
             }
+
+
+
             app.Run();
         }
     }
