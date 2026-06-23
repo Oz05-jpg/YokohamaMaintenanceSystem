@@ -6,10 +6,10 @@ using Microsoft.OpenApi;
 using System.Text;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
-using YokohamaMaintenanceSystem.Filters;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 using YokohamaMaintenanceSystem.Repositories;
+using YokohamaMaintenanceSystem.Services;
 
 
 namespace YokohamaMaintenanceSystem
@@ -39,7 +39,6 @@ namespace YokohamaMaintenanceSystem
                     BearerFormat = "JWT",
                     Description = "ใส่แค่ JWT token (ไม่ต้องใส่ Bearer นำหน้า)"
                 });
-                c.OperationFilter<BearerAuthOperationFilter>();
             });
 
             // JwtSettings
@@ -66,6 +65,12 @@ namespace YokohamaMaintenanceSystem
                         Encoding.UTF8.GetBytes(secretKey!))
                 };
             });
+
+            //OverdueRequestAlertService
+            builder.Services.AddHostedService<OverdueRequestAlertService>();
+
+            //Cache Dashboard Stats
+            builder.Services.AddMemoryCache();
 
             // Database
             builder.Services.AddDbContext<AppDbContext>(option =>
