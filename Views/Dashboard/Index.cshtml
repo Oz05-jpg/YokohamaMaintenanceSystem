@@ -40,3 +40,17 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/maintenancehub")          // ← URL ของ Hub (เดียวกับที่ MapHub ใน Program.cs)
+        .build();
+
+        connection.on("NewRequest", function(title) {    // ← ชื่อ event เดียวกับ SendAsync
+        alert("แจ้งเตือน: มี Request ใหม่ — " + title);
+        });
+
+        connection.start().catch(err => console.error(err));
+    </script>
+}

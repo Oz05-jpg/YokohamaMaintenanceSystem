@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Hubs;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 
@@ -15,13 +17,20 @@ namespace YokohamaMaintenanceSystem.Controllers
 
         private readonly IMaintenanceRequestRepository _repo;
         private readonly AppDbContext _context;
+        private readonly ILogger<MaintenanceRequestsController> _logger;
+        private readonly IHubContext<MaintenanceHub> _hubContext;
+        private EventId exception;
 
         public MaintenanceRequestsController(
             IMaintenanceRequestRepository repo,
-            AppDbContext context)
+            AppDbContext context,
+            ILogger<MaintenanceRequestsController> logger,
+            IHubContext<MaintenanceHub> hubContext)
         {
             _repo = repo;
             _context = context;
+            _logger = logger;
+            _hubContext = hubContext;
         }
 
         // GET: requests
@@ -89,6 +98,9 @@ namespace YokohamaMaintenanceSystem.Controllers
             if (ModelState.IsValid)
             {
                 await _repo.AddAsync(request);
+                await _hubContext.Clients.All.SendAsync("NewRequest", request.Title);
+                //เก็บ log
+                _logger.LogInformation("Request created:{Title}", request.Title);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -187,8 +199,13 @@ namespace YokohamaMaintenanceSystem.Controllers
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             var requests = await _repo.GetByIdAsync(id.Value);
-            if (requests == null) return NotFound();
+            if (requests == null)
+            {
+                _logger.LogWarning("Delete failed - Request {Id} not found", id);
+                return NotFound();
+            }
             await _repo.DeleteAsync(id.Value);
+            _logger.LogInformation("Request deleted:{Id}", id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -228,10 +245,9 @@ namespace YokohamaMaintenanceSystem.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                _logger.LogError(exception, "Concurrency error updating Request{Id}", request.Id);
+                throw;
+
             }
         }
     }

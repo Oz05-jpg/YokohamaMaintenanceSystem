@@ -5,7 +5,7 @@ using YokohamaMaintenanceSystem.Models;
 
 namespace YokohamaMaintenanceSystem.Controllers
 {
-    [Authorize]//เพิ่ม attribute อะไรเพื่อล็อก endpoint ให้เฉพาะ user ที่มี token เท่านั้น?
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/maintenance")]
     [ApiController]
     public class MaintenanceApiController : ControllerBase

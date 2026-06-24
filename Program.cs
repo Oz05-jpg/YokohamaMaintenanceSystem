@@ -6,6 +6,7 @@ using Microsoft.OpenApi;
 using System.Text;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Hubs;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 using YokohamaMaintenanceSystem.Repositories;
@@ -45,12 +46,7 @@ namespace YokohamaMaintenanceSystem
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme =
-                  JwtBearerDefaults.AuthenticationScheme;
-            })
+            builder.Services.AddAuthentication()
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -71,6 +67,10 @@ namespace YokohamaMaintenanceSystem
 
             //Cache Dashboard Stats
             builder.Services.AddMemoryCache();
+
+            //SignalR
+            builder.Services.AddSignalR();
+
 
             // Database
             builder.Services.AddDbContext<AppDbContext>(option =>
@@ -118,6 +118,7 @@ namespace YokohamaMaintenanceSystem
                 .WithStaticAssets();
 
             app.MapRazorPages();
+            app.MapHub<MaintenanceHub>("/maintenancehub");
 
             // Seed data
             using (var scope = app.Services.CreateScope())
