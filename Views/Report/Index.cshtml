@@ -27,6 +27,11 @@
             </div>
         </div>
     </div>
+    <div class="col-md-4">
+        <a asp-action="ExportExcel" asp-controller="Report" class="btn btn-success">
+            Export Excel
+        </a>
+    </div>
 </div>
 
 @if (Model.PendingCount == 0 && Model.InProgressCount == 0 && Model.CompletedCount == 0)
