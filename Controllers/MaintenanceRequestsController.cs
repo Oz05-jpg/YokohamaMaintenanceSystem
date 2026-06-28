@@ -33,6 +33,15 @@ namespace YokohamaMaintenanceSystem.Controllers
             _hubContext = hubContext;
         }
 
+        // GET: GetAllAsync
+        public async Task<List<MaintenanceRequest>> GetAllAsync()
+        {
+            return await _context.MaintenanceRequests
+                .Include(r => r.Machine)
+                .Include(r => r.Technician)
+                .ToListAsync();
+        }
+
         // GET: requests
         public async Task<IActionResult> Index
             (string? keyword,
@@ -54,7 +63,6 @@ namespace YokohamaMaintenanceSystem.Controllers
             ViewBag.Statuses = new SelectList(Enum.GetValues(typeof(RequestStatus)));  //เก็บไว้ — ViewModel ไม่มี SelectList สำหรับ dropdown
             return View(viewModels);
         }
-
         // GET: requests/Details/5
         public async Task<IActionResult> Details(int? id)
         {

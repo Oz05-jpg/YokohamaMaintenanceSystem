@@ -100,7 +100,7 @@ public class MachinesController : Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MachineExists(machine.Id))
+                if (!await MachineExists(machine.Id))
                 {
                     return NotFound();
                 }
@@ -149,8 +149,8 @@ public class MachinesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private bool MachineExists(int? id)
+    private async Task<bool> MachineExists(int? id)
     {
-        return _context.Machines.Any(e => e.Id == id);
+        return await _context.Machines.AnyAsync(e => e.Id == id);
     }
 }
