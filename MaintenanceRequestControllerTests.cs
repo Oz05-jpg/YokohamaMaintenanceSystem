@@ -1,33 +1,48 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using YokohamaMaintenanceSystem.Controllers;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Hubs;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
+
 namespace YokohamaMaintenanceSystem.Tests;
 
 public class MaintenanceRequestControllerTests
 {
     private readonly Mock<IMaintenanceRequestRepository> _mockRepo;
+    private readonly Mock<ILogger<MaintenanceRequestsController>> _mockLogger;
+    private readonly Mock<IHubContext<MaintenanceHub>> _mockHub;
     private readonly MaintenanceRequestsController _controller;
 
     public MaintenanceRequestControllerTests()
     {
         _mockRepo = new Mock<IMaintenanceRequestRepository>();
+        _mockLogger = new Mock<ILogger<MaintenanceRequestsController>>();
+        _mockHub = new Mock<IHubContext<MaintenanceHub>>();
+
+        // setup Clients.All เพื่อไม่ให้ NullReferenceException
+        var mockClients = new Mock<IHubClients>();
+        var mockClientProxy = new Mock<IClientProxy>();
+        _mockHub.Setup(h => h.Clients).Returns(mockClients.Object);
+        mockClients.Setup(c => c.All).Returns(mockClientProxy.Object);
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase("TestDb").Options;
         var context = new AppDbContext(options);
 
-        _controller = new MaintenanceRequestsController(_mockRepo.Object, context);
+        _controller = new MaintenanceRequestsController(
+            _mockRepo.Object, context, _mockLogger.Object, _mockHub.Object);
     }
 
     [Fact]
     public async Task Index_ReturnsViewWithList()
     {
-        // Arrange คือ การเตรียมข้อมูล หรือ Mock up
+        // Arrange
         var fakeList = new List<MaintenanceRequest>
         {
             new MaintenanceRequest { Id = 1, Title = "Fix Machine A", Description = "Test", Priority = "High" },
@@ -36,30 +51,18 @@ public class MaintenanceRequestControllerTests
 
         _mockRepo.Setup(r => r.GetFilteredAsync(
             It.IsAny<string?>(),
-            It.IsAny<RequestStatus?>()))
+            It.IsAny<RequestStatus?>(),
+            It.IsAny<int>(),
+            It.IsAny<int>()))
         .ReturnsAsync(fakeList);
 
-        // Act คือ ดึง method จริงมา มาใช้ Test
+        // Act
         var result = await _controller.Index(null, null) as ViewResult;
 
-        // Assert คือ ตรวจสอบผลลัพธ์
-        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
-        Assert.Equal(2, model.Count());
+        // Assert
+        var model = Assert.IsType<PagedRequestViewModel>(result!.Model);
+        Assert.Equal(2, model.Requests.Count);
     }
-
-    //[Fact]
-    //public async Task Details_InvalidId_ReturnsNotFound()
-    //{
-    //    // Arrange
-    //    _mockRepo.Setup(r => r.GetByIdAsync(99))
-    //             .ReturnsAsync((MaintenanceRequest)null);
-
-    //    // Act
-    //    var result = await _controller.Details(99);
-
-    //    // Assert
-    //    Assert.IsType<NotFoundResult>(result);
-    //}
 
     [Theory]
     [InlineData(0)]
@@ -79,22 +82,22 @@ public class MaintenanceRequestControllerTests
     }
 
     [Fact]
-    //Create
     public async Task Create_ValidRequest_RedirectsToIndex()
     {
-        //Arrange
+        // Arrange
         var request = new MaintenanceRequest
         {
             Title = "Test",
             Description = "Test",
             Priority = "High"
         };
+
         // Act
         var result = await _controller.Create(request);
 
         // Assert
-        var redirect = Assert.IsType<RedirectToActionResult>(result);//
-        Assert.Equal("Index", redirect.ActionName);//
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", redirect.ActionName);
     }
 
     [Fact]
@@ -102,7 +105,10 @@ public class MaintenanceRequestControllerTests
     {
         // Arrange
         _mockRepo.Setup(r => r.GetFilteredAsync(
-        It.IsAny<string?>(), It.IsAny<RequestStatus?>()))
+            It.IsAny<string?>(),
+            It.IsAny<RequestStatus?>(),
+            It.IsAny<int>(),
+            It.IsAny<int>()))
         .ReturnsAsync(new List<MaintenanceRequest>());
 
         // Act
@@ -110,14 +116,14 @@ public class MaintenanceRequestControllerTests
 
         // Assert
         Assert.NotNull(result);
-        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
-        Assert.Equal(0, model.Count());
+        var model = Assert.IsType<PagedRequestViewModel>(result!.Model);
+        Assert.Equal(0, model.Requests.Count);
     }
 
     [Fact]
     public async Task Index_FilterByStatus_ReturnsMatchingRecords()
     {
-        //arrange
+        // Arrange
         var pendingList = new List<MaintenanceRequest>
         {
             new MaintenanceRequest { Id = 1, Title = "Fix pump",
@@ -126,17 +132,18 @@ public class MaintenanceRequestControllerTests
         };
 
         _mockRepo.Setup(r => r.GetFilteredAsync(
-        It.IsAny<string?>(),
-        It.IsAny<RequestStatus?>()))
+            It.IsAny<string?>(),
+            It.IsAny<RequestStatus?>(),
+            It.IsAny<int>(),
+            It.IsAny<int>()))
         .ReturnsAsync(pendingList);
 
         // Act
-        var result = await _controller.Index(null, "Pending") as ViewResult;
-
+        var result = await _controller.Index(null, RequestStatus.Pending) as ViewResult;
 
         // Assert
-        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
-        Assert.Single(model);
+        var model = Assert.IsType<PagedRequestViewModel>(result!.Model);
+        Assert.Single(model.Requests);
     }
 
     [Fact]
@@ -145,22 +152,29 @@ public class MaintenanceRequestControllerTests
         // Arrange
         var filtered = new List<MaintenanceRequest>
         {
-              new MaintenanceRequest
+            new MaintenanceRequest
             {
                 Id = 2,
                 Title = "Pump broken",
                 Description = "Test",
                 Priority = "High",
-                Status = YokohamaMaintenanceSystem.Enums.RequestStatus.Pending }
+                Status = RequestStatus.Pending
+            }
         };
-        _mockRepo.Setup(r => r.GetFilteredAsync("Pump", null))
-                 .ReturnsAsync(filtered);
+
+        _mockRepo.Setup(r => r.GetFilteredAsync(
+            "Pump",
+            null,
+            It.IsAny<int>(),
+            It.IsAny<int>()))
+        .ReturnsAsync(filtered);
+
         // Act
         var result = await _controller.Index("Pump", null) as ViewResult;
 
         // Assert
-        var model = Assert.IsAssignableFrom<IEnumerable<MaintenanceRequest>>(result!.Model);
-        Assert.Single(model);
-        Assert.Contains("Pump", model.First().Title);
+        var model = Assert.IsType<PagedRequestViewModel>(result!.Model);
+        Assert.Single(model.Requests);
+        Assert.Contains("Pump", model.Requests.First().Title);
     }
 }
