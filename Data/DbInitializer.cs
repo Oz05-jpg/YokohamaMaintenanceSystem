@@ -7,9 +7,20 @@ public static class DbInitializer
 {
     public static async Task SeedAsync(AppDbContext context)
     {
-        // Step 1: ล้างทุกอย่างด้วย SQL ก่อนเสมอ (bypass EF tracking)
-        await context.Database.ExecuteSqlRawAsync("DELETE FROM MaintenanceRequests");
-        await context.Database.ExecuteSqlRawAsync("DELETE FROM Machines");
+        // Step 1: ล้างทุกอย่างก่อนเสมอ
+        if (context.Database.IsRelational())
+        {
+            // SQL Server — ใช้ raw SQL (bypass EF tracking)
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM MaintenanceRequests");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM Machines");
+        }
+        else
+        {
+            // InMemory (test environment) — ใช้ EF แทน
+            context.MaintenanceRequests.RemoveRange(context.MaintenanceRequests);
+            context.Machines.RemoveRange(context.Machines);
+            await context.SaveChangesAsync();
+        }
 
         // Step 2: Seed Machines ใหม่
         context.Machines.AddRange(
