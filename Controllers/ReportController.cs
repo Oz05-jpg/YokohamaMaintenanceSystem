@@ -1,9 +1,9 @@
-﻿using ClosedXML.Excel;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Factories;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 
@@ -35,40 +35,34 @@ namespace YokohamaMaintenanceSystem.Controllers
             return View(vm);
         }
 
-        public async Task<IActionResult> ExportExcel()
+        // ExportExcel
+        public async Task<IActionResult> Export([FromQuery] string format)
         {
             var requests = await _context.MaintenanceRequests
               .Include(r => r.Machine)
               .ToListAsync();
 
-            using var workbook = new XLWorkbook();
-            var ws = workbook.Worksheets.Add("Report");
-
-            //Header row (row 1)
-            ws.Cell(1, 1).Value = "Id";
-            ws.Cell(1, 2).Value = "Title";
-            ws.Cell(1, 3).Value = "Status";
-            ws.Cell(1, 4).Value = "MachineName";
-            ws.Cell(1, 5).Value = "CreatedAt";
-
-            // Data rows (เริ่มที่ row 2)
-            int row = 2;
-            foreach (var r in requests)
+            try
             {
-                ws.Cell(row, 1).Value = r.Id;
-                ws.Cell(row, 2).Value = r.Title;
-                ws.Cell(row, 3).Value = r.Status.ToString();   // Status เป็น enum
-                ws.Cell(row, 4).Value = r.Machine?.Name ?? "N/A"; // MachineName (nullable)
-                ws.Cell(row, 5).Value = r.CreatedAt.ToString("yyyy-MM-dd");
-                row++;
+                var exporter = ReportExporterFactory.Create(format);
+                var bytes = exporter.Export(requests);
+
+                var contentType = format == "excel"
+    ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    : "text/csv; charset=utf-8";  // ← เพิ่ม charset
+
+                var fileName = format == "excel" ? "report.xlsx" : "report.csv";
+
+                return File(bytes, contentType, fileName);
+
             }
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            var bytes = stream.ToArray();
+            catch (ArgumentException)
+            {
+                return BadRequest($"Unknown format: {format}");
+            }
 
-            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");
+
+
         }
-
-
     }
 }
