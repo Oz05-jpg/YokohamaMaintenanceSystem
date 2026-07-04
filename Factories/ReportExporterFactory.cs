@@ -12,6 +12,7 @@ namespace YokohamaMaintenanceSystem.Factories
             {
                 case "excel": return new ExcelExporter();
                 case "csv": return new CsvExporter();
+                case "pdf": return new PdfExporter();
                 default: throw new ArgumentException($"Unknown format: {format}");
             }
         }

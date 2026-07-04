@@ -47,11 +47,22 @@ namespace YokohamaMaintenanceSystem.Controllers
                 var exporter = ReportExporterFactory.Create(format);
                 var bytes = exporter.Export(requests);
 
-                var contentType = format == "excel"
-    ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    : "text/csv; charset=utf-8";  // ← เพิ่ม charset
+                var contentType = format switch
+                {
+                    "excel" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "csv" => "text/csv; charset=utf-8",
+                    "pdf" => "application/pdf",
+                    _ => throw new ArgumentException()
 
-                var fileName = format == "excel" ? "report.xlsx" : "report.csv";
+                };
+
+                var fileName = format switch
+                {
+                    "excel" => "MaintenanceReport.xlsx",
+                    "csv" => "MaintenanceReport.csv",
+                    "pdf" => "MaintenanceReport.pdf",
+                    _ => throw new ArgumentException()
+                };
 
                 return File(bytes, contentType, fileName);
 
