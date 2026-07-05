@@ -19,18 +19,21 @@ namespace YokohamaMaintenanceSystem.Controllers
         private readonly AppDbContext _context;
         private readonly ILogger<MaintenanceRequestsController> _logger;
         private readonly IHubContext<MaintenanceHub> _hubContext;
+        private readonly IAuditLogService _auditLogService;
         private EventId exception;
 
         public MaintenanceRequestsController(
             IMaintenanceRequestRepository repo,
             AppDbContext context,
             ILogger<MaintenanceRequestsController> logger,
-            IHubContext<MaintenanceHub> hubContext)
+            IHubContext<MaintenanceHub> hubContext,
+            IAuditLogService auditLogService)
         {
             _repo = repo;
             _context = context;
             _logger = logger;
             _hubContext = hubContext;
+            _auditLogService = auditLogService;
         }
 
         // GET: GetAllAsync
@@ -109,6 +112,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 await _hubContext.Clients.All.SendAsync("NewRequest", request.Title);
                 //เก็บ log
                 _logger.LogInformation("Request created:{Title}", request.Title);
+                _auditLogService.LogAction($"Created request: {request.Title}");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -161,6 +165,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 try
                 {
                     await _repo.UpdateAsync(request);
+                    _auditLogService.LogAction($"Updated  request: {request.Title}");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -213,6 +218,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 return NotFound();
             }
             await _repo.DeleteAsync(id.Value);
+            _auditLogService.LogAction($"Deleted request: {id}");
             _logger.LogInformation("Request deleted:{Id}", id);
             return RedirectToAction(nameof(Index));
         }
@@ -258,5 +264,7 @@ namespace YokohamaMaintenanceSystem.Controllers
 
             }
         }
+
+
     }
 }

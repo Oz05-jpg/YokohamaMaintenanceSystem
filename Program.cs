@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -88,6 +87,10 @@ namespace YokohamaMaintenanceSystem
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
+
+            // AuditLogservices
+            builder.Services.AddSingleton<IAuditLogService, AuditLogService>();
+
             // Static assets
             var app = builder.Build();
             // Configure the HTTP request pipeline.
