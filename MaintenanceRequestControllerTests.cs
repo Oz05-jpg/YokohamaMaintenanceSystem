@@ -9,6 +9,7 @@ using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Hubs;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
+using YokohamaMaintenanceSystem.Services;
 
 namespace YokohamaMaintenanceSystem.Tests;
 
@@ -17,6 +18,7 @@ public class MaintenanceRequestControllerTests
     private readonly Mock<IMaintenanceRequestRepository> _mockRepo;
     private readonly Mock<ILogger<MaintenanceRequestsController>> _mockLogger;
     private readonly Mock<IHubContext<MaintenanceHub>> _mockHub;
+    private readonly Mock<IAuditLogService> _mockAuditLog;
     private readonly MaintenanceRequestsController _controller;
 
     public MaintenanceRequestControllerTests()
@@ -24,6 +26,7 @@ public class MaintenanceRequestControllerTests
         _mockRepo = new Mock<IMaintenanceRequestRepository>();
         _mockLogger = new Mock<ILogger<MaintenanceRequestsController>>();
         _mockHub = new Mock<IHubContext<MaintenanceHub>>();
+        _mockAuditLog = new Mock<IAuditLogService>();
 
         // setup Clients.All เพื่อไม่ให้ NullReferenceException
         var mockClients = new Mock<IHubClients>();
@@ -36,7 +39,7 @@ public class MaintenanceRequestControllerTests
         var context = new AppDbContext(options);
 
         _controller = new MaintenanceRequestsController(
-            _mockRepo.Object, context, _mockLogger.Object, _mockHub.Object);
+            _mockRepo.Object, context, _mockLogger.Object, _mockHub.Object, _mockAuditLog.Object);
     }
 
     [Fact]
