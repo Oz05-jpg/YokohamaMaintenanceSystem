@@ -32,4 +32,11 @@
     <None Include=".github\workflows\ci.yml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="YokohamaMaintenanceSystem.Tests\**" />
+    <Content Remove="YokohamaMaintenanceSystem.Tests\**" />
+    <EmbeddedResource Remove="YokohamaMaintenanceSystem.Tests\**" />
+    <None Remove="YokohamaMaintenanceSystem.Tests\**" />
+  </ItemGroup>
+
 </Project>

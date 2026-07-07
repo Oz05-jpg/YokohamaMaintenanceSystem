@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="YokohamaMaintenanceSystem.csproj" />
+  <Project Path="YokohamaMaintenanceSystem.Tests/YokohamaMaintenanceSystem.Tests.csproj" />
+</Solution>
