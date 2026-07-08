@@ -8,6 +8,7 @@ using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Hubs;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
+using YokohamaMaintenanceSystem.Services;
 
 namespace YokohamaMaintenanceSystem.Controllers
 {
@@ -20,6 +21,7 @@ namespace YokohamaMaintenanceSystem.Controllers
         private readonly ILogger<MaintenanceRequestsController> _logger;
         private readonly IHubContext<MaintenanceHub> _hubContext;
         private readonly IAuditLogService _auditLogService;
+        private readonly MaintenanceNotifier _maintenanceNotifier;
         private EventId exception;
 
         public MaintenanceRequestsController(
@@ -27,13 +29,15 @@ namespace YokohamaMaintenanceSystem.Controllers
             AppDbContext context,
             ILogger<MaintenanceRequestsController> logger,
             IHubContext<MaintenanceHub> hubContext,
-            IAuditLogService auditLogService)
+            IAuditLogService auditLogService,
+            MaintenanceNotifier maintenanceNotifier)
         {
             _repo = repo;
             _context = context;
             _logger = logger;
             _hubContext = hubContext;
             _auditLogService = auditLogService;
+            _maintenanceNotifier = maintenanceNotifier;
         }
 
         // GET: GetAllAsync
@@ -251,6 +255,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             try
             {
                 await _repo.UpdateAsync(request);
+                _maintenanceNotifier.ChangeStatus(request.Id, status);
                 return RedirectToAction(nameof(Details), new { id = request.Id });
             }
             catch (DbUpdateConcurrencyException)

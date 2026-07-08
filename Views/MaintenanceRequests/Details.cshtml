@@ -71,7 +71,8 @@
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <form asp-action="UpdateStatus" asp-route-id="@Model?.Id" method="post" style="display:inline">
         <input type="hidden" name="id" value="@Model.Id" />
-        <select name="Status">
+        <select name="newStatus">
+            <option >ระบุสถานะการทำงาน</option>
             <option value="Pending">Pending</option>
             <option value="InProgress">In Progress</option>
             <option value="Completed">Completed</option>

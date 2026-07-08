@@ -91,8 +91,20 @@ namespace YokohamaMaintenanceSystem
             // AuditLogservices
             builder.Services.AddSingleton<IAuditLogService, AuditLogService>();
 
+            //MaintenanceNotificationService
+            builder.Services.AddSingleton<MaintenanceNotifier>();
+
             // Static assets
             var app = builder.Build();
+
+            var notifier = app.Services.GetRequiredService<MaintenanceNotifier>();
+            var auditLog = app.Services.GetRequiredService<IAuditLogService>();
+            notifier.StatusChanged += async (sender, args) =>
+            {
+                // Log the status change
+                auditLog.LogAction($"Status changed: Request {args.RequestId} → {args.NewStatus}");
+            };
+
             // Configure the HTTP request pipeline.
 
             if (app.Environment.IsDevelopment())

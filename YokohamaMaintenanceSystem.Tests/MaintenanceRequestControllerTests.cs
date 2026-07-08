@@ -39,7 +39,7 @@ public class MaintenanceRequestControllerTests
         var context = new AppDbContext(options);
 
         _controller = new MaintenanceRequestsController(
-            _mockRepo.Object, context, _mockLogger.Object, _mockHub.Object, _mockAuditLog.Object);
+        _mockRepo.Object, context, _mockLogger.Object, _mockHub.Object, _mockAuditLog.Object, new MaintenanceNotifier());
     }
 
     [Fact]
