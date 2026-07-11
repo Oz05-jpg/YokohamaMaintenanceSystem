@@ -1,6 +1,6 @@
 # Yokohama Maintenance System
 
-Equipment maintenance management system for manufacturing environments, built with ASP.NET Core MVC and .NET 10.
+Equipment maintenance management system for manufacturing environments, built with ASP.NET Core MVC and .NET 10 — developed ticket-by-ticket as a portfolio project simulating a real maintenance dept. workflow.
 
 ## Tech Stack
 
@@ -10,37 +10,68 @@ Equipment maintenance management system for manufacturing environments, built wi
 | Framework | ASP.NET Core MVC |
 | ORM | Entity Framework Core |
 | Database | SQL Server |
-| Auth | ASP.NET Core Identity + Role-based Authorization |
-| Testing | xUnit + Moq |
-| API | ASP.NET Core Web API + Swagger |
+| Auth (Web) | ASP.NET Core Identity + Role-based Authorization |
+| Auth (API) | JWT Bearer + Refresh Token rotation |
+| Real-time | SignalR |
+| Reporting | ClosedXML (Excel) · QuestPDF (PDF) · CSV |
+| Testing | xUnit + Moq + WebApplicationFactory (integration) |
+| CI/CD | GitHub Actions |
+| API Docs | Swagger / OpenAPI |
+
+## Architecture & Design Patterns
+
+Built to demonstrate applied OOP/SOLID, not just CRUD:
+
+- **Repository Pattern (Generic)** — `IRepository<T>` / `Repository<T>` base class; `MachineRepository`, `TechnicianRepository`, `MaintenanceRequestRepository` extend it instead of duplicating CRUD
+- **Factory Pattern** — `ReportExporterFactory` picks `CsvExporter` / `ExcelExporter` / `PdfExporter` behind a shared `IReportExporter` interface
+- **Strategy Pattern** — `INotificationStrategy` (`LogNotificationStrategy`, `SignalRNotificationStrategy`) swapped at runtime for overdue-request alerts
+- **Singleton** — `AuditLogService` registered as a thread-safe singleton (`lock` + defensive copy over the log list)
+- **Observer (Delegates/Events)** — `MaintenanceNotifier.StatusChanged` event; `AuditLogService` subscribes and logs every status change without the notifier knowing who's listening
+- **Dependency Injection** — constructor injection throughout controllers, services, and repositories
 
 ## Features
 
-- **Machine Management** — CRUD for factory machines with role-based access
-- **Maintenance Requests** — Create, track, and update repair/maintenance tickets
-- **Technician Assignment** — Assign technicians to requests via dropdown (FK relationship)
-- **Status Tracking** — Enum-based status (Pending / InProgress / Completed) with color badges
-- **Report Dashboard** — Summary counts grouped by status and machine using ViewModel + LINQ
-- **Search & Filter** — IQueryable-based filtering with conditional LINQ (no extra DB round-trips)
-- **Pagination** — Skip/Take with OrderBy and PagedRequestViewModel
-- **Repository Pattern** — Interface-based data access layer with Dependency Injection
-- **Unit Testing** — xUnit + Moq + InMemory DB (18 tests)
-- **Global Error Handling** — UseExceptionHandler + UseStatusCodePagesWithReExecute + ILogger
-- **REST API** — JSON endpoints for external integration (GET / PUT status) + Swagger UI
+**Core CRUD**
+- Machine Management, Maintenance Request tracking (status workflow), Technician CRUD + assignment (FK dropdown)
+
+**Auth & Access**
+- ASP.NET Core Identity + role-based Admin panel (MVC)
+- JWT Bearer + Refresh Token rotation for the Web API (`AuthController`)
+
+**Real-time & Background**
+- SignalR live alerts (`MaintenanceHub`)
+- `OverdueRequestAlertService` — background job (`IHostedService`) polling for overdue requests on a timer
+
+**Reporting & Export**
+- Report dashboard (status/machine summary via ViewModel + LINQ)
+- CSV / Excel / PDF export (Factory pattern above)
+
+**Data & Quality**
+- Search, Filter, Pagination (`IQueryable`, no extra DB round-trips)
+- Global Error Handling (`UseExceptionHandler` + `UseStatusCodePagesWithReExecute`) + `ILogger`
+- Audit Log (who did what, when) exposed via `GET /api/audit-logs`
+- Unit + integration test suite (xUnit, Moq, in-memory DB, `WebApplicationFactory`)
+- CI pipeline (GitHub Actions) running build + tests on push
 
 ## Project Structure
 
 ```
 YokohamaMaintenanceSystem/
 ├── Controllers/          # MVC + API Controllers
-├── Interfaces/           # Repository interfaces
-├── Repositories/         # EF Core data access implementations
-├── Models/               # Domain models + ViewModels + DTOs
+├── Interfaces/           # Repository/service interfaces
+├── Repositories/         # Generic + entity-specific EF Core data access
+├── Services/             # AuditLogService, MaintenanceNotifier, notification strategies, background alert service
+├── Factories/            # ReportExporterFactory
+├── Exporters/            # Csv/Excel/PdfExporter implementations
+├── Hubs/                 # SignalR MaintenanceHub
+├── Models/               # Domain models + ViewModels
+├── DTOs/                 # API request/response DTOs (e.g. LoginDto)
 ├── Views/                # Razor views (.cshtml)
 ├── Data/                 # AppDbContext + DbInitializer
 ├── Enums/                # RequestStatus enum
 ├── Areas/Identity/       # ASP.NET Core Identity pages
-└── YokohamaMaintenanceSystem.Tests/  # xUnit test project
+├── .github/workflows/    # CI pipeline (ci.yml)
+└── YokohamaMaintenanceSystem.Tests/  # xUnit + integration test project
 ```
 
 ## Getting Started
@@ -78,11 +109,17 @@ dotnet run
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/maintenance` | Get all maintenance requests |
-| GET | `/api/maintenance/{id}` | Get request by ID |
-| PUT | `/api/maintenance/{id}/status` | Update request status |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/login` | Log in, returns JWT + refresh token | — |
+| POST | `/api/auth/refresh` | Rotate refresh token | — |
+| POST | `/api/auth/logout` | Revoke refresh token | Bearer |
+| GET | `/api/maintenance` | Get all maintenance requests | Bearer |
+| GET | `/api/maintenance/{id}` | Get request by ID | Bearer |
+| PUT | `/api/maintenance/{id}/status` | Update request status | Bearer |
+| GET | `/api/audit-logs` | Get audit log entries | Bearer |
+
+Swagger UI: `https://localhost:{port}/swagger`
 
 ## Sprint Tickets
 
@@ -100,3 +137,21 @@ dotnet run
 | #010 | Pagination (Skip/Take) | ✅ |
 | #011 | Global Error Handling + ILogger | ✅ |
 | #012 | Web API + Swagger | ✅ |
+| #013 | JWT Authentication for Web API | ✅ |
+| #014 | Refresh Token + Token Rotation + Logout | ✅ |
+| #015 | BackgroundService (overdue request check) | ✅ |
+| #016 | IMemoryCache Dashboard Cache | ✅ |
+| #017 | SignalR Real-time Alert | ✅ |
+| #018 | Excel Export (ClosedXML) | ✅ |
+| #019 | GitHub Actions CI/CD Pipeline | ✅ |
+| #020 | Integration Testing (WebApplicationFactory) | ✅ |
+| #022 | Factory Pattern (Report Exporter) | ✅ |
+| #023 | PDF Export (QuestPDF) | ✅ |
+| #024 | Singleton Pattern (AuditLogService) | ✅ |
+| #025 | Thread-Safe AuditLogService | ✅ |
+| #026 | Delegates/Events (Status Change Notifier) | ✅ |
+| #027 | Wire StatusChanged → AuditLogService subscriber | ✅ |
+| #028 | Generic Repository (`IRepository<T>`/`Repository<T>`) | ✅ |
+| #029–031 | Repository<T> reuse (Machine, Technician) + Strategy Pattern (overdue notifications) | ✅ |
+
+*(#021 Docker containerization — parked, not required by target JD)*
