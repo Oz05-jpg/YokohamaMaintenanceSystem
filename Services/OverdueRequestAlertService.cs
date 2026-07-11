@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
+using YokohamaMaintenanceSystem.Interfaces;
 
 
 namespace YokohamaMaintenanceSystem.Services
@@ -11,12 +12,16 @@ namespace YokohamaMaintenanceSystem.Services
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<OverdueRequestAlertService> _logger;
         private readonly IConfiguration _config;
-        public OverdueRequestAlertService(IServiceScopeFactory scopeFactory, ILogger<OverdueRequestAlertService> logger,
-            IConfiguration config)
+        private readonly INotificationStrategy _notifier;
+        public OverdueRequestAlertService(
+            IServiceScopeFactory scopeFactory, ILogger<OverdueRequestAlertService> logger,
+            IConfiguration config,
+            INotificationStrategy notifire)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
             _config = config;
+            _notifier = notifire;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,9 +43,8 @@ namespace YokohamaMaintenanceSystem.Services
                 if (overdue.Any())
                 {
                     _logger.LogWarning("{Count} overdue requests pending", overdue.Count);
+                    await _notifier.NotifyAsync($"{overdue.Count} overdue requests pending");
                 }
-
-
             }
         }
     }

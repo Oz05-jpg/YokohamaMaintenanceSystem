@@ -64,6 +64,10 @@ namespace YokohamaMaintenanceSystem
             //OverdueRequestAlertService
             builder.Services.AddHostedService<OverdueRequestAlertService>();
 
+            //NotificationStrategy
+            builder.Services.AddSingleton<INotificationStrategy, SignalRNotificationStrategy>();
+
+
             //Cache Dashboard Stats
             builder.Services.AddMemoryCache();
 
@@ -76,6 +80,10 @@ namespace YokohamaMaintenanceSystem
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Repositories
             builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
+            builder.Services.AddScoped<IMachineRepository, MachineRepository>();
+            builder.Services.AddScoped<ITechnicianRepository, TechnicianRepository>();
+
+
             // Identity
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
                 options.SignIn.RequireConfirmedAccount = false)
