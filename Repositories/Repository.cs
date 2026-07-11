@@ -49,5 +49,10 @@ namespace YokohamaMaintenanceSystem.Repositories
             return entity;
 
         }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.Set<T>().FindAsync(id) != null;
+        }
     }
 }

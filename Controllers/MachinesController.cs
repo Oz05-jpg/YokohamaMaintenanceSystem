@@ -13,14 +13,10 @@ namespace YokohamaMaintenanceSystem.Controllers
     {
 
         //Index , Details, Create, Edit - login ธรรมดาเข้าได้
-        private readonly AppDbContext _context;
         private readonly IMachineRepository _repo;
 
-        public MachinesController(
-            AppDbContext context,
-            IMachineRepository repo)
+        public MachinesController(IMachineRepository repo)
         {
-            _context = context;
             _repo = repo;
         }
 
@@ -101,7 +97,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await MachineExists(machine.Id))
+                    if (!await _repo.ExistsAsync(machine.Id))
                     {
                         return NotFound();
                     }
@@ -139,15 +135,17 @@ namespace YokohamaMaintenanceSystem.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            var machine = await _repo.GetByIdAsync(id.Value);
-            if (machine != null)
-                await _repo.DeleteAsync(id.Value);
-            return RedirectToAction(nameof(Index));
-        }
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-        private async Task<bool> MachineExists(int? id)
-        {
-            return await _context.Machines.AnyAsync(e => e.Id == id);
+            var machine = await _repo.DeleteAsync(id.Value);
+            if (machine == null)
+            {
+                return NotFound();
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

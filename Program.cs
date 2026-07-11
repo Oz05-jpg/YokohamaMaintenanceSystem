@@ -66,6 +66,7 @@ namespace YokohamaMaintenanceSystem
 
             //NotificationStrategy
             builder.Services.AddSingleton<INotificationStrategy, SignalRNotificationStrategy>();
+            builder.Services.AddSingleton<INotificationStrategy, LogNotificationStrategy>();
 
 
             //Cache Dashboard Stats

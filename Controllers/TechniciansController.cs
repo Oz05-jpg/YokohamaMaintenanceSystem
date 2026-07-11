@@ -11,14 +11,10 @@ namespace YokohamaMaintenanceSystem.Controllers
     [Authorize]
     public class TechniciansController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly ITechnicianRepository _repo;
 
-        public TechniciansController(
-            AppDbContext context,
-            ITechnicianRepository repo)
+        public TechniciansController(ITechnicianRepository repo)
         {
-            _context = context;
             _repo = repo;
         }
 
@@ -97,7 +93,7 @@ namespace YokohamaMaintenanceSystem.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TechnicianExists(technician.Id))
+                    if (!await _repo.ExistsAsync(technician.Id))
                     {
                         return NotFound();
                     }
@@ -135,16 +131,17 @@ namespace YokohamaMaintenanceSystem.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            var technician = await _repo.GetByIdAsync(id.Value);
-            if (technician != null)
-                await _repo.DeleteAsync(id.Value);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var technician = await _repo.DeleteAsync(id.Value);
+            if (technician == null)
+            {
+                return NotFound();
+            }
             return RedirectToAction(nameof(Index));
-
-        }
-
-        private bool TechnicianExists(int? id)
-        {
-            return _context.Technicians.Any(e => e.Id == id);
         }
     }
 }
