@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YokohamaMaintenanceSystem.Data;
+using YokohamaMaintenanceSystem.Decorators;
 using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Factories;
 using YokohamaMaintenanceSystem.Interfaces;
@@ -36,7 +37,7 @@ namespace YokohamaMaintenanceSystem.Controllers
         }
 
         // ExportExcel
-        public async Task<IActionResult> Export([FromQuery] string format)
+        public async Task<IActionResult> Export([FromQuery] string format, bool compress = false)
         {
             var requests = await _context.MaintenanceRequests
               .Include(r => r.Machine)
@@ -45,7 +46,9 @@ namespace YokohamaMaintenanceSystem.Controllers
             try
             {
                 var exporter = ReportExporterFactory.Create(format);
-                var bytes = exporter.Export(requests);
+                IReportExporter finalExporter = compress ? new CompressedExportDecorator(exporter) : exporter;
+
+                var bytes = finalExporter.Export(requests);
 
                 var contentType = format switch
                 {
@@ -63,6 +66,12 @@ namespace YokohamaMaintenanceSystem.Controllers
                     "pdf" => "MaintenanceReport.pdf",
                     _ => throw new ArgumentException()
                 };
+
+                if (compress)
+                {
+                    fileName = fileName + ".gz";
+                    contentType = "application/gzip";
+                }
 
                 return File(bytes, contentType, fileName);
 
