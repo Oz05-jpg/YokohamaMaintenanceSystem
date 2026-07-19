@@ -64,6 +64,9 @@ namespace YokohamaMaintenanceSystem
             //OverdueRequestAlertService
             builder.Services.AddHostedService<OverdueRequestAlertService>();
 
+            //SensorSimulationService IoT
+            builder.Services.AddHostedService<SensorSimulationService>();
+
             //NotificationStrategy
             builder.Services.AddSingleton<INotificationStrategy, SignalRNotificationStrategy>();
             builder.Services.AddSingleton<INotificationStrategy, LogNotificationStrategy>();
