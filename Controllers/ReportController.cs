@@ -33,6 +33,22 @@ namespace YokohamaMaintenanceSystem.Controllers
                 InProgressCount = requests.Count(r => r.Status == RequestStatus.InProgress),
                 CompletedCount = requests.Count(r => r.Status == RequestStatus.Completed)
             };
+
+            // ส่วนนี้คือการคำนวณประสิทธิภาพของช่างเทคนิค โดยใช้ GroupJoin เพื่อรวมข้อมูลจากตาราง Technicians และ MaintenanceRequests
+            var technicianPerformances = await _context.Technicians.GroupJoin(
+                _context.MaintenanceRequests, //GroupJoin คือการรวมข้อมูลจากสองตาราง โดยใช้คีย์ที่สัมพันธ์กัน ส่วนนี้คือการเลือกข้อมูลจากตาราง MaintenanceRequestsและนำมารวมกับตาราง Technicians
+                t => t.Id,   //key ฝั่ง Technicians
+                mr => mr.TechnicianId, // key ฝั่ง MaintenanceRequests
+                (t, mrs) => new TechnicianPerformanceViewModel
+                {
+                    FullName = t.FullName,
+                    TotalAssigned = mrs.Count(),
+                    TotalCompleted = mrs.Count(r => r.Status == RequestStatus.Completed)
+                })
+                .OrderByDescending(x => x.TotalAssigned)
+                .ToListAsync();
+
+            vm.TechnicianPerformances = technicianPerformances;
             return View(vm);
         }
 
