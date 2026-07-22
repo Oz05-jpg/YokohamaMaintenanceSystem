@@ -48,6 +48,27 @@
         </a>
     </div>
 
+    <h3 class="mt-4">Technician Performances</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Technician</th>
+                <th>Total Assigned</th>
+                <th>Total Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tech in Model.TechnicianPerformances)
+            {
+                <tr>
+                    <td>@tech.FullName</td>
+                    <td>@tech.TotalAssigned</td>
+                    <td>@tech.TotalCompleted</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
 </div>
 
 @if (Model.PendingCount == 0 && Model.InProgressCount == 0 && Model.CompletedCount == 0)
