@@ -6,5 +6,6 @@
         public int InProgressCount { get; set; }
         public int CompletedCount { get; set; }
         public List<TechnicianPerformanceViewModel> TechnicianPerformances { get; set; } = new();
+        public List<MachinePerformanceViewModel> MachinePerformances { get; set; } = new();
     }
 }

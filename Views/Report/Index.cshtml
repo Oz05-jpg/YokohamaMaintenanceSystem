@@ -68,6 +68,28 @@
             }
         </tbody>
     </table>
+    <h3 class="mt-4">Machine Performances</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Total Fixed Requests</th>
+                <th>Total Fixed In Progress</th>
+                <th>Total High Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var machine in Model.MachinePerformances)
+            {
+                <tr>
+                    <td>@machine.MachineName</td>
+                    <td>@machine.TotalFixedRequests</td>
+                    <td>@machine.TotalFixedInProgress</td>
+                    <td>@machine.TotalHighPriority </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
 </div>
 

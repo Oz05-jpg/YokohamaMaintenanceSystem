@@ -47,8 +47,24 @@ namespace YokohamaMaintenanceSystem.Controllers
                 })
                 .OrderByDescending(x => x.TotalAssigned)
                 .ToListAsync();
+            // ส่วนนี้คือการคำนวณประสิทธิภาพของเครื่องจักร โดยใช้ GroupJoin เพื่อรวมข้อมูลจากตาราง Machines และ MaintenanceRequests
+            var machinePerformances = await _context.Machines.GroupJoin(
+                _context.MaintenanceRequests,
+                m => m.Id,
+                mr => mr.MachineId,
+                (m, mrs) => new MachinePerformanceViewModel
+                {
+                    MachineName = m.Name,
+                    TotalFixedRequests = mrs.Count(),
+                    TotalFixedInProgress = mrs.Count(r => r.Status == RequestStatus.InProgress),
+                    TotalHighPriority = mrs.Count(r => r.Priority == "High")
+                })
+                .OrderByDescending(x => x.TotalFixedRequests)
+                .ToListAsync();
 
+            // กำหนดค่าประสิทธิภาพของช่างเทคนิคและเครื่องจักรให้กับ ViewModel
             vm.TechnicianPerformances = technicianPerformances;
+            vm.MachinePerformances = machinePerformances;
             return View(vm);
         }
 
