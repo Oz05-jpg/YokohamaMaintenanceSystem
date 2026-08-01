@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using YokohamaMaintenanceSystem.Configuration;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Interfaces;
@@ -11,22 +13,22 @@ namespace YokohamaMaintenanceSystem.Services
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<OverdueRequestAlertService> _logger;
-        private readonly IConfiguration _config;
+        private readonly OverdueAlertSettings _setting;
         private readonly IEnumerable<INotificationStrategy> _notifiers;
         public OverdueRequestAlertService(
             IServiceScopeFactory scopeFactory, ILogger<OverdueRequestAlertService> logger,
-            IConfiguration config,
+            IOptions<OverdueAlertSettings> options,
             IEnumerable<INotificationStrategy> notifiers)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
-            _config = config;
+            _setting = options.Value;
             _notifiers = notifiers;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var minutes = _config.GetValue<int>("BackgroundServices:OverdueAlertIntervalMinutes");
+            var minutes = _setting.IntervalMinutes;
             var timer = new PeriodicTimer(TimeSpan.FromMinutes(minutes));
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {

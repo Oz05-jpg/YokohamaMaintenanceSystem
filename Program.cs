@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using YokohamaMaintenanceSystem.Configuration;
 using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Hubs;
@@ -64,8 +65,20 @@ namespace YokohamaMaintenanceSystem
             //OverdueRequestAlertService
             builder.Services.AddHostedService<OverdueRequestAlertService>();
 
+            //SensorSimulationSettings — strongly-typed config + fail-fast validation (TICKET #035)
+            builder.Services.AddOptions<SensorSimulationSettings>()
+                .Bind(builder.Configuration.GetSection("SensorSimulation"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             //SensorSimulationService IoT
             builder.Services.AddHostedService<SensorSimulationService>();
+
+            //OverdueRequestAlertService
+            builder.Services.AddOptions<OverdueAlertSettings>()
+               .Bind(builder.Configuration.GetSection("OverdueRequestAlert"))
+               .ValidateDataAnnotations()
+               .ValidateOnStart();
 
             //NotificationStrategy
             builder.Services.AddSingleton<INotificationStrategy, SignalRNotificationStrategy>();
