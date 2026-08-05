@@ -3,7 +3,7 @@
 -- and wrap the aggregate logic in a reusable View.
 -- Edge case handled: machines with 0 requests must still show RequestCount = 0 (not disappear).
 
-USE YokohamaMaintenanceSystem;
+USE YokohamaMaintenanceDB;
 GO
 
 -- Step 1: average MaintenanceRequest count per machine (includes machines with 0 requests)
