@@ -1,79 +1,73 @@
 @model YokohamaMaintenanceSystem.Models.MaintenanceRequest
-
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "New Maintenance Request";
 }
 
-<h1>Create</h1>
-
-<h4>MaintenanceRequest</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Priority" class="control-label"></label>
-                <input asp-for="Priority" class="form-control" />
-                <span asp-validation-for="Priority" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control" asp-items="ViewBag.Status">
-                    <option value="">-- เลือกสถานะ --</option>
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="CompletedAt" class="control-label"></label>
-                <input asp-for="CompletedAt" class="form-control" />
-                <span asp-validation-for="CompletedAt" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="MachineId" class="control-label"></label>
-                <select asp-for="MachineId" class="form-control" asp-items="ViewBag.MachineId">
-                    <option value="">-- เลือกเครื่องจักร --</option>
-                </select>
-                <span asp-validation-for="MachineId" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="TechnicianId" class="control-label"></label>
-                <select asp-for="TechnicianId" class="form-control" asp-items="ViewBag.TechnicianId">
-                    <option value="">-- เลือกช่างเทคนิค --</option>
-                </select>
-                <span asp-validation-for="TechnicianId" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="yms-header">
+    <h2>🛠️ New Maintenance Request</h2>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label fw-semibold"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label fw-semibold"></label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Priority" class="form-label fw-semibold"></label>
+            <input asp-for="Priority" class="form-control" placeholder="Low, Medium, High" />
+            <span asp-validation-for="Priority" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label fw-semibold"></label>
+            <select asp-for="Status" class="form-select" asp-items="ViewBag.Status">
+                <option value="">-- เลือกสถานะ --</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CreatedAt" class="form-label fw-semibold"></label>
+            <input asp-for="CreatedAt" class="form-control" />
+            <span asp-validation-for="CreatedAt" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CompletedAt" class="form-label fw-semibold"></label>
+            <input asp-for="CompletedAt" class="form-control" />
+            <span asp-validation-for="CompletedAt" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MachineId" class="form-label fw-semibold"></label>
+            <select asp-for="MachineId" class="form-select" asp-items="ViewBag.MachineId">
+                <option value="">-- เลือกเครื่องจักร --</option>
+            </select>
+            <span asp-validation-for="MachineId" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="TechnicianId" class="form-label fw-semibold"></label>
+            <select asp-for="TechnicianId" class="form-select" asp-items="ViewBag.TechnicianId">
+                <option value="">-- เลือกช่างเทคนิค --</option>
+            </select>
+            <span asp-validation-for="TechnicianId" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-yms px-4">Save</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
 </div>

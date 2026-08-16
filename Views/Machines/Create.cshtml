@@ -1,54 +1,43 @@
 @model YokohamaMaintenanceSystem.Models.Machine
-
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add Machine";
 }
 
-<h1>Create</h1>
-
-<h4>Machine</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Location" class="control-label"></label>
-                <input asp-for="Location" class="form-control" />
-                <span asp-validation-for="Location" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="InstalledDate" class="control-label"></label>
-                <input asp-for="InstalledDate" class="form-control" />
-                <span asp-validation-for="InstalledDate" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="MaintenanceRequests" class="control-label"></label>
-                <input asp-for="MaintenanceRequests" class="form-control" />
-                <span asp-validation-for="MaintenanceRequests" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="yms-header">
+    <h2>🔧 Add Machine</h2>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label fw-semibold"></label>
+            <input asp-for="Name" class="form-control" placeholder="เช่น เครื่องรีดยาง A1" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Location" class="form-label fw-semibold"></label>
+            <input asp-for="Location" class="form-control" placeholder="เช่น โซน A ชั้น 1" />
+            <span asp-validation-for="Location" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label fw-semibold"></label>
+            <input asp-for="Status" class="form-control" placeholder="Running, Stopped, Under Maintenance" />
+            <span asp-validation-for="Status" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="InstalledDate" class="form-label fw-semibold"></label>
+            <input asp-for="InstalledDate" class="form-control" />
+            <span asp-validation-for="InstalledDate" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-yms px-4">Save</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
 </div>

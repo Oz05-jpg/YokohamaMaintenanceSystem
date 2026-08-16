@@ -49,6 +49,38 @@
             </div>
         </nav>
     </header>
+    @if (TempData["StatusMessage"] != null || TempData["ErrorMessage"] != null)
+    {
+        <div class="yms-toast-container">
+            @if (TempData["StatusMessage"] != null)
+            {
+                <div class="yms-toast success">
+                    <span class="yms-toast-icon">✓</span>
+                    <div class="yms-toast-body"><p>@TempData["StatusMessage"]</p></div>
+                    <button type="button" class="yms-toast-close" aria-label="Close">&times;</button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="yms-toast error">
+                    <span class="yms-toast-icon">!</span>
+                    <div class="yms-toast-body"><p>@TempData["ErrorMessage"]</p></div>
+                    <button type="button" class="yms-toast-close" aria-label="Close">&times;</button>
+                </div>
+            }
+        </div>
+        <script>
+            document.querySelectorAll('.yms-toast').forEach(function (toast) {
+                requestAnimationFrame(function () { toast.classList.add('show'); });
+                var dismiss = function () {
+                    toast.classList.remove('show');
+                    setTimeout(function () { toast.remove(); }, 200);
+                };
+                toast.querySelector('.yms-toast-close').addEventListener('click', dismiss);
+                setTimeout(dismiss, 4000);
+            });
+        </script>
+    }
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()

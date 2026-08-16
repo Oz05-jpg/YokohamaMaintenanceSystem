@@ -256,6 +256,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             {
                 await _repo.UpdateAsync(request);
                 _maintenanceNotifier.ChangeStatus(request.Id, status);
+                TempData["StatusMessage"] = $"อัปเดตสถานะเป็น \"{status}\" เรียบร้อยแล้ว";
                 return RedirectToAction(nameof(Details), new { id = request.Id });
             }
             catch (DbUpdateConcurrencyException)
