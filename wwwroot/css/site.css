@@ -29,8 +29,8 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
-/* === YMS Industrial Theme === */
-.yms-header {
+/* === FMMS Industrial Theme === */
+.fmms-header {
     background: #1B2A4A;
     color: white;
     padding: 1.25rem 1.75rem;
@@ -41,13 +41,13 @@ body {
     align-items: center;
 }
 
-    .yms-header h2 {
+    .fmms-header h2 {
         margin: 0;
         font-size: 1.4rem;
         letter-spacing: 0.5px;
     }
 
-.btn-yms {
+.btn-fmms {
     background: #F59E0B;
     border: none;
     color: #1B2A4A;
@@ -56,12 +56,12 @@ body {
     border-radius: 6px;
 }
 
-    .btn-yms:hover {
+    .btn-fmms:hover {
         background: #D97706;
         color: #1B2A4A;
     }
 
-.yms-table thead th {
+.fmms-table thead th {
     background: #1B2A4A;
     color: white;
     border: none;
@@ -69,7 +69,7 @@ body {
     padding: 0.85rem 1rem;
 }
 
-.yms-table tbody tr:hover {
+.fmms-table tbody tr:hover {
     background: #FFF8EC;
 }
 
@@ -89,8 +89,8 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* === YMS Toast Notification (top-right, auto-dismiss) === */
-.yms-toast-container {
+/* === FMMS Toast Notification (top-right, auto-dismiss) === */
+.fmms-toast-container {
     position: fixed;
     top: 1.25rem;
     right: 1.25rem;
@@ -102,7 +102,7 @@ body {
     max-width: 360px;
 }
 
-.yms-toast {
+.fmms-toast {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
@@ -116,12 +116,12 @@ body {
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-    .yms-toast.show {
+    .fmms-toast.show {
         opacity: 1;
         transform: translateY(0);
     }
 
-.yms-toast-icon {
+.fmms-toast-icon {
     flex-shrink: 0;
     width: 24px;
     height: 24px;
@@ -134,26 +134,26 @@ body {
     font-weight: 700;
 }
 
-.yms-toast.success .yms-toast-icon {
+.fmms-toast.success .fmms-toast-icon {
     background: #16A34A;
 }
 
-.yms-toast.error .yms-toast-icon {
+.fmms-toast.error .fmms-toast-icon {
     background: #DC2626;
 }
 
-.yms-toast-body {
+.fmms-toast-body {
     flex: 1;
 }
 
-    .yms-toast-body p {
+    .fmms-toast-body p {
         margin: 0;
         font-size: 0.9rem;
         color: #1B2A4A;
         font-weight: 500;
     }
 
-.yms-toast-close {
+.fmms-toast-close {
     background: none;
     border: none;
     color: #9CA3AF;
@@ -164,6 +164,6 @@ body {
     flex-shrink: 0;
 }
 
-    .yms-toast-close:hover {
+    .fmms-toast-close:hover {
         color: #1B2A4A;
     }

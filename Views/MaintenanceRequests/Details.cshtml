@@ -3,7 +3,7 @@
     ViewData["Title"] = "Maintenance Request Details";
 }
 
-<div class="yms-header">
+<div class="fmms-header">
     <h2>🛠️ Maintenance Request Details</h2>
     <a asp-action="Index" class="btn btn-outline-light btn-sm">← Back</a>
 </div>
@@ -38,7 +38,7 @@
     <hr />
 
     <div class="d-flex align-items-center gap-2 flex-wrap">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-yms">Edit</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-fmms">Edit</a>
 
         <form asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
             <input type="hidden" name="id" value="@Model.Id" />
@@ -48,7 +48,7 @@
                 <option value="InProgress">In Progress</option>
                 <option value="Completed">Completed</option>
             </select>
-            <button type="submit" class="btn btn-yms btn-sm">Update</button>
+            <button type="submit" class="btn btn-fmms btn-sm">Update</button>
         </form>
 
         <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>

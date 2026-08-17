@@ -3,22 +3,22 @@
     ViewData["Title"] = "Technicians";
 }
 
-<div class="yms-header">
+<div class="fmms-header">
     <h2>👷 Technician Management</h2>
-    <a asp-action="Create" class="btn btn-yms">+ Add Technician</a>
+    <a asp-action="Create" class="btn btn-fmms">+ Add Technician</a>
 </div>
 
 @if (!Model.Any())
 {
     <div class="text-center py-5 text-muted">
         <p style="font-size:1.1rem">ยังไม่มีข้อมูลช่างเทคนิค</p>
-        <a asp-action="Create" class="btn btn-yms mt-2">เพิ่มช่างคนแรก</a>
+        <a asp-action="Create" class="btn btn-fmms mt-2">เพิ่มช่างคนแรก</a>
     </div>
 }
 else
 {
     <div class="table-responsive">
-        <table class="table yms-table">
+        <table class="table fmms-table">
             <thead>
                 <tr>
                     <th>ชื่อ-นามสกุล</th>

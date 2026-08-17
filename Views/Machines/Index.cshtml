@@ -3,22 +3,22 @@
 @{
     ViewData["Title"] = "Machines";
 }
-<div class="yms-header">
+<div class="fmms-header">
     <h2> 🔧 เครื่องจักร Machines Management </h2>
-    <a asp-action="Create" class="btn btn-yms mt-2">+ เพิ่มเครื่องจักร</a>
+    <a asp-action="Create" class="btn btn-fmms mt-2">+ เพิ่มเครื่องจักร</a>
 </div>
 
 @if (!Model.Any())
 {
     <div class="text-center py-5 text-muted">
         <p style="font-size:1.1rem">ไม่พบเครื่องจักร</p>
-        <a asp-action="Create" class="btn btn-yms mt-2">+ เพิ่มเครื่องจักร</a>
+        <a asp-action="Create" class="btn btn-fmms mt-2">+ เพิ่มเครื่องจักร</a>
     </div>
 }
 else
 {
     <div class="table-responsive">
-        <table class="table yms-table">
+        <table class="table fmms-table">
             <thead>
                 <tr>
                     <th>ชื่อเครื่องจักร</th>
