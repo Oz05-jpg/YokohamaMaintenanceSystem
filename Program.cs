@@ -161,11 +161,13 @@ namespace YokohamaMaintenanceSystem
             app.MapHub<MaintenanceHub>("/maintenancehub");
 
             // Seed data
-            using (var scope = app.Services.CreateScope())
+            try
             {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                using (var scope = app.Services.CreateScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
                 // Roles
                 if (!await roleManager.RoleExistsAsync("Admin"))
@@ -213,13 +215,18 @@ namespace YokohamaMaintenanceSystem
                     );
                     await db.SaveChangesAsync();
                 }
-            }
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                await DbInitializer.SeedAsync(context);
-            }
+                }
 
+                using (var scope = app.Services.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    await DbInitializer.SeedAsync(context);
+                }
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning(ex, "Seed data ล้มเหลว — ข้ามไปก่อน (DB อาจต่อไม่ได้ในสภาพแวดล้อมนี้)");
+            }
 
 
             app.Run();
