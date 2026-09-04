@@ -98,6 +98,10 @@ namespace YokohamaMaintenanceSystem
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
                        .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
+            //Health Checks
+            builder.Services.AddHealthChecks()
+              .AddDbContextCheck<AppDbContext>();
+
 
             // Repositories
             builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
@@ -153,6 +157,8 @@ namespace YokohamaMaintenanceSystem
             app.UseRouting();//UseExceptionHandler ต้องวาง ก่อน UseRouting() เสมอ
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapHealthChecks("/health");
 
             app.MapStaticAssets();
             app.MapControllers();
