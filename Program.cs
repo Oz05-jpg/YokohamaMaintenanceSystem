@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -100,7 +101,7 @@ namespace YokohamaMaintenanceSystem
 
             //Health Checks
             builder.Services.AddHealthChecks()
-              .AddDbContextCheck<AppDbContext>();
+              .AddDbContextCheck<AppDbContext>(tags: new[] { "ready" });
 
 
             // Repositories
@@ -158,7 +159,17 @@ namespace YokohamaMaintenanceSystem
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapHealthChecks("/health");
+
+            // Health checks
+            app.MapHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = _ => false
+            });
+
+            app.MapHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = check => check.Tags.Contains("ready")
+            });
 
             app.MapStaticAssets();
             app.MapControllers();
