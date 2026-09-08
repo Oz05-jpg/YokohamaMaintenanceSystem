@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YokohamaMaintenanceSystem.Data;
 
@@ -11,9 +12,11 @@ using YokohamaMaintenanceSystem.Data;
 namespace YokohamaMaintenanceSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260908050223_RequestStatusHistories")]
+    partial class RequestStatusHistories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,7 +248,7 @@ namespace YokohamaMaintenanceSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Machines", (string)null);
+                    b.ToTable("Machines");
                 });
 
             modelBuilder.Entity("YokohamaMaintenanceSystem.Models.MaintenanceRequest", b =>
@@ -289,7 +292,7 @@ namespace YokohamaMaintenanceSystem.Migrations
 
                     b.HasIndex("TechnicianId");
 
-                    b.ToTable("MaintenanceRequests", (string)null);
+                    b.ToTable("MaintenanceRequests");
                 });
 
             modelBuilder.Entity("YokohamaMaintenanceSystem.Models.RefreshToken", b =>
@@ -316,7 +319,7 @@ namespace YokohamaMaintenanceSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("YokohamaMaintenanceSystem.Models.RequestStatusHistory", b =>
@@ -343,7 +346,7 @@ namespace YokohamaMaintenanceSystem.Migrations
 
                     b.HasIndex("MaintenanceRequestId");
 
-                    b.ToTable("RequestStatusHistories", (string)null);
+                    b.ToTable("RequestStatusHistories");
                 });
 
             modelBuilder.Entity("YokohamaMaintenanceSystem.Models.Technician", b =>
@@ -370,7 +373,7 @@ namespace YokohamaMaintenanceSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Technicians", (string)null);
+                    b.ToTable("Technicians");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

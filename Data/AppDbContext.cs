@@ -13,6 +13,9 @@ namespace YokohamaMaintenanceSystem.Data
 
         public DbSet<Models.Machine> Machines { get; set; }//DbSet สำหรับตาราง Machines ในฐานข้อมูล
         public DbSet<MaintenanceRequest> MaintenanceRequests { get; set; }//DbSet สำหรับตาราง MaintenanceRequests ในฐานข้อมูล
+
+        public DbSet<RequestStatusHistory> RequestStatusHistories { get; set; }//DbSet สำหรับตาราง RequestStatusHistories ในฐานข้อมูล
+
         public DbSet<Technician> Technicians { get; set; }//DbSet สำหรับตาราง Technicians ในฐานข้อมูล
         public DbSet<RefreshToken> RefreshTokens { get; set; }///DbSet สำหรับตาราง RefreshToken ในฐานข้อมูล
     }

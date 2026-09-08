@@ -251,10 +251,21 @@ namespace YokohamaMaintenanceSystem.Controllers
             {
                 return BadRequest();
             }
+
+            var oldStatus = request.Status; // เก็บสถานะเก่าไว้ก่อนอัปเดต
             request.Status = status; // อัปเดตสถานะของคำขอเป็นค่าที่แปลงได้จาก Status
+            var history = new RequestStatusHistory
+            {
+                MaintenanceRequestId = request.Id,
+                OldStatus = oldStatus,
+                NewStatus = status,
+                ChangedAt = DateTime.Now
+            };
+
             try
             {
-                await _repo.UpdateAsync(request);
+                await _context.RequestStatusHistories.AddAsync(history); // บันทึกประวัติการเปลี่ยนแปลงสถานะ
+                await _repo.UpdateAsync(request);  // อัปเดตคำขอในฐานข้อมูล
                 _maintenanceNotifier.ChangeStatus(request.Id, status);
                 TempData["StatusMessage"] = $"อัปเดตสถานะเป็น \"{status}\" เรียบร้อยแล้ว";
                 return RedirectToAction(nameof(Details), new { id = request.Id });
