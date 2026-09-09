@@ -85,7 +85,21 @@ namespace YokohamaMaintenanceSystem.Controllers
                 return NotFound();
             }
 
-            return View(requests);
+            // ดึงประวัติการเปลี่ยนแปลงสถานะของคำขอจากฐานข้อมูล
+            var histories = await _context.RequestStatusHistories
+                .Where(h => h.MaintenanceRequestId == id.Value)
+                .OrderByDescending(h => h.ChangedAt)
+                .ToListAsync();
+
+            // สร้าง ViewModel เพื่อส่งข้อมูลไปยัง View
+            var viewModel = new RequestStatusHistoryViewModel
+            {
+                Request = requests,
+                Histories = histories
+            };
+
+            // ส่งข้อมูลไปยัง View
+            return View(viewModel);
         }
 
         // GET: requests/Create

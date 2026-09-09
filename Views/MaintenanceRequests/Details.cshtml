@@ -1,4 +1,4 @@
-@model YokohamaMaintenanceSystem.Models.MaintenanceRequest
+@model YokohamaMaintenanceSystem.Models.RequestStatusHistoryViewModel
 @{
     ViewData["Title"] = "Maintenance Request Details";
 }
@@ -11,37 +11,37 @@
 <div class="form-card">
     <dl class="row">
         <dt class="col-sm-3 text-muted">Title</dt>
-        <dd class="col-sm-9 fw-semibold">@Model.Title</dd>
+        <dd class="col-sm-9 fw-semibold">@Model.Request.Title</dd>
 
         <dt class="col-sm-3 text-muted">Description</dt>
-        <dd class="col-sm-9">@Model.Description</dd>
+        <dd class="col-sm-9">@Model.Request.Description</dd>
 
         <dt class="col-sm-3 text-muted">Priority</dt>
-        <dd class="col-sm-9">@Model.Priority</dd>
+        <dd class="col-sm-9">@Model.Request.Priority</dd>
 
         <dt class="col-sm-3 text-muted">Status</dt>
-        <dd class="col-sm-9">@Model.Status</dd>
+        <dd class="col-sm-9">@Model.Request.Status</dd>
 
         <dt class="col-sm-3 text-muted">Created</dt>
-        <dd class="col-sm-9">@Model.CreatedAt</dd>
+        <dd class="col-sm-9">@Model.Request.CreatedAt</dd>
 
         <dt class="col-sm-3 text-muted">Completed</dt>
-        <dd class="col-sm-9">@Model.CompletedAt</dd>
+        <dd class="col-sm-9">@Model.Request.CompletedAt</dd>
 
         <dt class="col-sm-3 text-muted">เครื่องจักร</dt>
-        <dd class="col-sm-9">@Model.Machine?.Name</dd>
+        <dd class="col-sm-9">@Model.Request.Machine?.Name</dd>
 
         <dt class="col-sm-3 text-muted">ช่างเทคนิค</dt>
-        <dd class="col-sm-9">@(Model.Technician?.FullName ?? "ยังไม่ assign")</dd>
+        <dd class="col-sm-9">@(Model.Request.Technician?.FullName ?? "ยังไม่ assign")</dd>
     </dl>
 
     <hr />
 
     <div class="d-flex align-items-center gap-2 flex-wrap">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-fmms">Edit</a>
+        <a asp-action="Edit" asp-route-id="@Model.Request.Id" class="btn btn-fmms">Edit</a>
 
-        <form asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
-            <input type="hidden" name="id" value="@Model.Id" />
+        <form asp-action="UpdateStatus" asp-route-id="@Model.Request.Id" method="post" class="d-flex gap-2">
+            <input type="hidden" name="id" value="@Model.Request.Id" />
             <select name="newStatus" class="form-select form-select-sm">
                 <option>ระบุสถานะการทำงาน</option>
                 <option value="Pending">Pending</option>
@@ -53,4 +53,45 @@
 
         <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
     </div>
+</div>
+
+@* ===== ส่วนแสดงประวัติการเปลี่ยนสถานะ ===== *@
+<div class="form-card mt-4">
+    <h3>Request Status History</h3>
+    
+    @if(Model.Histories == null || !Model.Histories.Any())
+    {
+        <div class="alert alert-info mb-0" role="alert">
+            <i class="bi bi-info-circle"></i>
+            ยังไม่มีประวัติการเปลี่ยนสถานะ
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 20%;">วันเวลา</th>
+                        <th style="width: 18%;">จากสถานะ</th>
+                        <th style="width: 18%;">เป็นสถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model.Histories)
+                    {
+                        <tr>
+                            <td>@h.ChangedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge bg-secondary">@h.OldStatus</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">@h.NewStatus</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
