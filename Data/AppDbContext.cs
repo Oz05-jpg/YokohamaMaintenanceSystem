@@ -10,14 +10,19 @@ namespace YokohamaMaintenanceSystem.Data
     {
         //คอนสตรัคเตอร์ที่รับ DbContextOptions เพื่อกำหนดการตั้งค่าการเชื่อมต่อกับฐานข้อมูล
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-        public DbSet<Models.Machine> Machines { get; set; }//DbSet สำหรับตาราง Machines ในฐานข้อมูล
-        public DbSet<MaintenanceRequest> MaintenanceRequests { get; set; }//DbSet สำหรับตาราง MaintenanceRequests ในฐานข้อมูล
-
-        public DbSet<RequestStatusHistory> RequestStatusHistories { get; set; }//DbSet สำหรับตาราง RequestStatusHistories ในฐานข้อมูล
-
-        public DbSet<Technician> Technicians { get; set; }//DbSet สำหรับตาราง Technicians ในฐานข้อมูล
-        public DbSet<RefreshToken> RefreshTokens { get; set; }///DbSet สำหรับตาราง RefreshToken ในฐานข้อมูล
+        //DbSet สำหรับตาราง Machines ในฐานข้อมูล
+        public DbSet<Models.Machine> Machines { get; set; }
+       
+        //DbSet สำหรับตาราง MaintenanceRequests ในฐานข้อมูล
+        public DbSet<MaintenanceRequest> MaintenanceRequests { get; set; }
+        //DbSet สำหรับตาราง RequestStatusHistories ในฐานข้อมูล
+        public DbSet<RequestStatusHistory> RequestStatusHistories { get; set; }
+        //DbSet สำหรับตาราง Technicians ในฐานข้อมูล
+        public DbSet<Technician> Technicians { get; set; }
+        //DbSet สำหรับตาราง RefreshToken ในฐานข้อมูล
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        //DbSet สำหรับตาราง SensorReadings ในฐานข้อมูล
+        public DbSet<SensorReading> SensorReadings { get; set; }
     }
 
     //คลาสนี้ใช้สำหรับการสร้าง DbContext ในระหว่างการออกแบบ (Design Time) เช่น การสร้าง Migration

@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Options;
 using YokohamaMaintenanceSystem.Configuration;
 using YokohamaMaintenanceSystem.Data;
+using YokohamaMaintenanceSystem.Enums;
 using YokohamaMaintenanceSystem.Interfaces;
+using YokohamaMaintenanceSystem.Models;
 
 namespace YokohamaMaintenanceSystem.Services
 {
@@ -38,6 +40,18 @@ namespace YokohamaMaintenanceSystem.Services
                 foreach (var machine in runningMachines)
                 {
                     int temperature = Random.Shared.Next(20, 100);
+
+                    // เก็บ reading ทุก tick - track ไว้ก่อน ยังไม่ save
+
+                    var reading = new SensorReading
+                    {
+                        MachineId = machine.Id,
+                        Machine = machine,                // satisfy required member
+                        Temperature = temperature,
+                        RecordedAt = DateTime.Now
+                    };
+                    await db.SensorReadings.AddAsync(reading);
+
                     // Simulate sensor data
                     if (temperature > _settings.TemperatureThreshold) //ใช้ threshold จาก config แทนเลข hardcode เดิม (90)
                     {
@@ -46,11 +60,28 @@ namespace YokohamaMaintenanceSystem.Services
                         {
                             await notifier.NotifyAsync($"Machine {machine.Name} temperature is high: {temperature} C - overheating");
                         }
+
+                        //เช็ค dedup มี request เปิดอยู่ของเครื่องนี้ไหม ถ้าไม่มีให้สร้างใหม่ ถ้ามีอยู่แล้วก็ไม่ต้องทำอะไร
+                        bool hasOpenRequest = await db.MaintenanceRequests
+                     .AnyAsync(r => r.MachineId == machine.Id && (r.Status == RequestStatus.Pending || r.Status == RequestStatus.InProgress), stoppingToken);
+                        if (!hasOpenRequest)
+                        {
+                            var maintenanceRequest = new MaintenanceRequest
+                            {
+                                Title = machine.Name,
+                                Description = $"Machine {machine.Name} temperature is high: {temperature} C - overheating",
+                                Priority = "High",
+                                MachineId = machine.Id,
+                            };
+                            await db.MaintenanceRequests.AddAsync(maintenanceRequest, stoppingToken);
+                        }
                     }
 
                 }
-
+                // save changes หลังจาก loop เสร็จ
+                await db.SaveChangesAsync();
             }
+
         }
     }
 }
