@@ -122,10 +122,41 @@ namespace YokohamaMaintenanceSystem.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request)
+        public async Task<IActionResult> Create([Bind("Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request, IFormFile? photo = null)
         {
+
+
+            if (photo != null)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(photo.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("Photo", "กรุณาอัปโหลดไฟล์ภาพที่มีนามสกุล JPG, JPEG หรือ PNG เท่านั้น");
+                }
+                else if (photo.Length > 5000000) // 5MB
+                {
+                    ModelState.AddModelError("Photo", "ขนาดไฟล์ภาพต้องไม่เกิน 5MB");
+                }
+            }
+
             if (ModelState.IsValid)
             {
+                if (photo != null)
+                {
+                    var filename = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
+                    //ใช้ guid เพื่อสร้างชื่อไฟล์ที่ไม่ซ้ำกัน
+                    var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    Directory.CreateDirectory(uploadFolder); // สร้างโฟลเดอร์ uploads ถ้ายังไม่มี
+                    var savePath = Path.Combine(uploadFolder, filename);// สร้าง path สำหรับบันทึกไฟล์ภาพ
+                    using (var steam = new FileStream(savePath, FileMode.Create))
+                    {
+                        await photo.CopyToAsync(steam);
+                    }
+                    request.PhotoPath = "/uploads/" + filename; //เก็บ path ของไฟล์ภาพไว้ในฐานข้อมูล
+                }
+
                 await _repo.AddAsync(request);
                 await _hubContext.Clients.All.SendAsync("NewRequest", request.Title);
                 //เก็บ log

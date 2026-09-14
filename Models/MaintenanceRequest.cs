@@ -19,6 +19,8 @@ namespace YokohamaMaintenanceSystem.Models
 
         public int? TechnicianId { get; set; }
         public Technician? Technician { get; set; }
-        //Techniciane? คือการระบุว่า Technician เป็นชนิดที่สามารถเป็น null ได้ ซึ่งหมายความว่า MaintenanceRequest อาจไม่มีการกำหนด Technician ที่รับผิดชอบได้ในบางกรณี เช่น เมื่อคำขอถูกสร้างขึ้นแต่ยังไม่ได้ถูกมอบหมายให้กับช่างเทคนิคใด ๆ หรือเมื่อคำขอถูกยกเลิกและไม่มีช่างเทคนิคที่เกี่ยวข้องอีกต่อไป
+        
+        public string? PhotoPath { get; set; } // Path to the photo of the issue 
+        
     }
 }

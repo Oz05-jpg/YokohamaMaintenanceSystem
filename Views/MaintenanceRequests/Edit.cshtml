@@ -8,7 +8,7 @@
 </div>
 
 <div class="form-card">
-    <form asp-action="Edit">
+    <form asp-action="Edit" enctype="multipart/form-data">
         <input type="hidden" asp-for="Id" />
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
@@ -65,6 +65,17 @@
             </select>
             <span asp-validation-for="TechnicianId" class="text-danger small"></span>
         </div>
+        <div class="mb-4">
+            <label class="form-label fw-semibold"> แนบรูปภาพ (ไม่บังคับ)</label>
+            <input type="file" id="photoInput" name="photo" class="form-control" accept=".jpg,.jpeg,.png" />
+            <span class="text-danger small"></span>
+
+            <!--เพิ่มรูปตัวอย่างที่ upload-->
+            <div id="photoPreviewWrapper" class="mt-2" style="display: none;">
+                <img id="photoPreview" src="#" alt="Photo Preview" class="img-thumbnail" style="max-width:600px; border-radius:8px;" />
+                <button type="button" id="removePhotoBtn" class="btn btn-danger ms-2">X</button>
+            </div>
+        </div>
 
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-fmms px-4">Save Changes</button>
@@ -76,3 +87,26 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+<script>
+    const photoInput = document.getElementById('photoInput');
+    const previewWrapper = document.getElementById('photoPreviewWrapper');
+    const previewImg = document.getElementById('photoPreview');
+    const removeBtn = document.getElementById('removePhotoBtn');
+
+    photoInput.addEventListener('change', function() {
+        const file = this.files[0];   // ไฟล์ที่ user เพิ่งเลือก — อยู่ตรงไหนของ photoInput?
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;   // ผลลัพธ์จากการอ่านไฟล์ อยู่ตรงไหนของ e?
+                previewWrapper.style.display = 'block';   // โชว์ wrapper ที่ซ่อนไว้
+            };
+            reader.readAsDataURL(file);   // method ที่สั่งให้ reader เริ่มอ่านไฟล์เป็น data URL
+        }
+    });
+
+    removeBtn.addEventListener('click', function() {
+        photoInput.value = '';   // เคลียร์ไฟล์ที่เลือกไว้ใน input
+        previewWrapper.style.display = 'none';   // ซ่อน wrapper กลับ
+    });
+</script>
