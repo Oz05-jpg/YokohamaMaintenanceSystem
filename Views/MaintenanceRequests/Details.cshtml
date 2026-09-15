@@ -33,6 +33,18 @@
 
         <dt class="col-sm-3 text-muted">ช่างเทคนิค</dt>
         <dd class="col-sm-9">@(Model.Request.Technician?.FullName ?? "ยังไม่ assign")</dd>
+
+        <dt class="col-sm-3 text-muted">รูปภาพ</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.Request.PhotoPath))
+            {
+                <img src="@Model.Request.PhotoPath" alt="Request Photo" class="img-thumbnail" style="max-width: 200px;" />
+            }
+            else
+            {
+                <span class="text-muted">No photo available</span>
+            }
+        </dd>
     </dl>
 
     <hr />

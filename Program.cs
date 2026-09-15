@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
@@ -156,6 +157,15 @@ namespace YokohamaMaintenanceSystem
 
             //app.UseHttpsRedirection();
             app.UseRouting();//UseExceptionHandler ต้องวาง ก่อน UseRouting() เสมอ
+            app.UseStaticFiles();
+            // เสิร์ฟไฟล์ที่ user อัปโหลดตอน runtime ตรงๆ จากดิสก์จริง (bypass Static Web Assets manifest ที่รู้จักแค่ไฟล์ตอน build)
+            var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsPath); // PhysicalFileProvider ต้องการให้โฟลเดอร์มีอยู่จริงตั้งแต่ตอน construct
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(uploadsPath),
+                RequestPath = "/uploads"
+            });
             app.UseAuthentication();
             app.UseAuthorization();
 

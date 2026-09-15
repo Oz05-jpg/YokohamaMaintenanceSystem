@@ -174,7 +174,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             return View(request);
         }
 
-        // GET: requests/Edit/5
+        // GET: requests/Edit/
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -183,6 +183,7 @@ namespace YokohamaMaintenanceSystem.Controllers
             }
 
             var request = await _repo.GetByIdAsync(id.Value);
+
             if (request == null)
             {
                 return NotFound();
@@ -197,24 +198,57 @@ namespace YokohamaMaintenanceSystem.Controllers
             return View(request);
         }
 
-        // POST: requests/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: requests/Edit/
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, [Bind("Id,Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request)
+        public async Task<IActionResult> Edit(int? id, [Bind("Id,Title,Description,Priority,Status,CreatedAt,CompletedAt,MachineId,TechnicianId")] MaintenanceRequest request, IFormFile? photo = null)
         {
             if (id != request.Id)
             {
                 return NotFound();
             }
 
+            // Validate photo if provided
+            if (photo != null)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(photo.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("Photo", "กรุณาอัปโหลดไฟล์ภาพที่มีนามสกุล JPG, JPEG หรือ PNG เท่านั้น");
+                }
+                else if (photo.Length > 5000000) // 5MB
+                {
+                    ModelState.AddModelError("Photo", "ขนาดไฟล์ภาพต้องไม่เกิน 5MB");
+                }
+            }
+
+            // Validate model state
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var existingRequest = _context.MaintenanceRequests.Where(r => r.Id == request.Id).Select(r => r.PhotoPath).FirstOrDefault();
+                    //EF Core จะดึงเฉพาะ PhotoPath ของคำขอที่มี Id ตรงกับ request.Id
+
+                    if (photo != null)
+                    {
+                        var filename = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
+                        var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                        Directory.CreateDirectory(uploadFolder);
+                        var savePath = Path.Combine(uploadFolder, filename);
+                        using (var stream = new FileStream(savePath, FileMode.Create))
+                        {
+                            await photo.CopyToAsync(stream);
+                        }
+                        request.PhotoPath = "/uploads/" + filename;
+                    }
+                    else
+                    {
+                        request.PhotoPath = existingRequest; // ถ้าไม่มีการอัปโหลดภาพใหม่ ให้เก็บ path ของภาพเดิมไว้
+                    }
                     await _repo.UpdateAsync(request);
-                    _auditLogService.LogAction($"Updated  request: {request.Title}");
+                    _auditLogService.LogAction($"Updated request: {request.Title}");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -235,7 +269,9 @@ namespace YokohamaMaintenanceSystem.Controllers
                 await _context.Technicians.ToListAsync(), "Id", "FullName", request.TechnicianId);
             ViewBag.Status = new SelectList(
                 Enum.GetValues<RequestStatus>(), request.Status);
+
             return View(request);
+
         }
 
         // GET: requests/Delete/5

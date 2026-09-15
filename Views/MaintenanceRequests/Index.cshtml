@@ -44,6 +44,7 @@ else
             <thead>
                 <tr>
                     <th>Title</th>
+                    <th>Photo</th>
                     <th>Description</th>
                     <th>Priority</th>
                     <th>Status</th>
@@ -59,6 +60,16 @@ else
                 {
                     <tr>
                         <td>@item.Title</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.PhotoPath))
+                            {
+                                <img src="@item.PhotoPath" alt="Request Photo" class="img-thumbnail" style="max-width: 100px;" />
+                            }
+                            else
+                            {
+                                <span class="text-muted">No photo</span>
+                            }
+                        </td>
                         <td>@item.Description</td>
                         <td>@item.Priority</td>
                         <td>
