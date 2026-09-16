@@ -53,7 +53,9 @@ namespace YokohamaMaintenanceSystem.Services
                     await db.SensorReadings.AddAsync(reading);
 
                     // Simulate sensor data
-                    if (temperature > _settings.TemperatureThreshold) //ใช้ threshold จาก config แทนเลข hardcode เดิม (90)
+                    int threshold = machine.TemperatureThreshold ?? _settings.TemperatureThreshold; //ใช้ threshold จาก machine ถ้ามี ถ้าไม่มีใช้จาก config
+
+                    if (temperature > threshold) // ถ้า temperature เกิน threshold ให้ log warning และส่ง notification
                     {
                         _logger.LogWarning("Machine {MachineName} temperature is high: {Temp}", machine.Name, temperature);
                         foreach (var notifier in _notifiers)

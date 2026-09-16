@@ -25,6 +25,12 @@
         </div>
 
         <div class="mb-3">
+            <label asp-for="TemperatureThreshold" class="form-label fw-semibold"></label>
+            <input asp-for="TemperatureThreshold" class="form-control" />
+            <span asp-validation-for="TemperatureThreshold" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
             <label asp-for="Status" class="form-label fw-semibold"></label>
             <input asp-for="Status" class="form-control" />
             <span asp-validation-for="Status" class="text-danger small"></span>

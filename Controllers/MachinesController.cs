@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using YokohamaMaintenanceSystem.Data;
 using YokohamaMaintenanceSystem.Interfaces;
 using YokohamaMaintenanceSystem.Models;
 
@@ -53,7 +52,7 @@ namespace YokohamaMaintenanceSystem.Controllers
         // POST: MACHINES/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Location,Status,InstalledDate")] Machine machine)
+        public async Task<IActionResult> Create([Bind("Id,Name,Location,Status,InstalledDate,TemperatureThreshold")] Machine machine)
         {
             if (ModelState.IsValid)
             {
@@ -82,7 +81,8 @@ namespace YokohamaMaintenanceSystem.Controllers
         // POST: MACHINES/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, [Bind("Id,Name,Location,Status,InstalledDate")] Machine machine)
+        public async Task<IActionResult> Edit(int? id,
+            [Bind("Id,Name,Location,Status,InstalledDate,TemperatureThreshold")] Machine machine)
         {
             if (id != machine.Id)
             {
