@@ -1,0 +1,12 @@
+﻿# Visual Studio — cache/settings เฉพาะเครื่อง ไม่เกี่ยวกับโค้ด
+.vs/
+
+# Build output — compile ใหม่ได้เสมอจาก source ไม่ต้อง track
+bin/
+obj/
+
+# User-specific project settings (breakpoint, startup project ฯลฯ)
+*.user
+*.userosscache
+# Runtime data — ไฟล์ที่ user อัปโหลดตอนแอปรันจริง ไม่ใช่ source code
+wwwroot/uploads/
